@@ -1,0 +1,184 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Client List - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>👥 My Clients</h2>
+            <p class="text-muted mb-0">Manage your client information</p>
+        </div>
+        <a href="{% url 'client_create' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add New Client
+        </a>
+    </div>
+
+    <!-- Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="search" class="form-control" placeholder="Search clients by name, email, or phone..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clients Grid -->
+    <div class="row">
+        {% if clients %}
+            {% for client in clients %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">{{ client.name }}</h5>
+                                {% if client.occupation %}
+                                <small class="text-muted">{{ client.occupation }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye"></i> View Details</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit Client</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-briefcase"></i> View Cases</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-archive"></i> Archive</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info mb-3">
+                            {% if client.phone %}
+                            <p class="mb-1 small">
+                                <i class="fas fa-phone text-muted me-2"></i>
+                                <a href="tel:{{ client.phone }}" class="text-decoration-none">{{ client.phone }}</a>
+                            </p>
+                            {% endif %}
+                            {% if client.email %}
+                            <p class="mb-1 small">
+                                <i class="fas fa-envelope text-muted me-2"></i>
+                                <a href="mailto:{{ client.email }}" class="text-decoration-none">{{ client.email }}</a>
+                            </p>
+                            {% endif %}
+                            {% if client.address %}
+                            <p class="mb-0 small text-muted">
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                {{ client.address|truncatechars:40 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Client Stats -->
+                        <div class="row text-center bg-light rounded p-2 mb-3">
+                            <div class="col-6">
+                                <div class="h6 mb-0 text-primary">{{ client.cases.count }}</div>
+                                <small class="text-muted">Cases</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h6 mb-0 text-success">{{ client.cases.all|length }}</div>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                        
+                        {% if client.notes %}
+                        <p class="card-text small text-muted">
+                            <i class="fas fa-sticky-note me-1"></i>
+                            {{ client.notes|truncatechars:60 }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">
+                                Added: {{ client.created_at|date:"M d, Y" }}
+                            </small>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" title="Call">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" title="Email">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                                <a href="{% url 'case_create' %}?client={{ client.id }}" class="btn btn-sm btn-outline-success" title="New Case">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if clients.has_other_pages %}
+            <div class="col-12">
+                <nav aria-label="Clients pagination" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if clients.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ clients.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in clients.paginator.page_range %}
+                        {% if clients.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > clients.number|add:'-3' and num < clients.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if clients.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ clients.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    {% if search_query %}
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No clients found</h5>
+                        <p class="text-muted">No clients match your search criteria.</p>
+                        <a href="{% url 'client_list' %}" class="btn btn-outline-primary">Clear Search</a>
+                    {% else %}
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5>No clients yet</h5>
+                        <p class="text-muted">You haven't added any clients to your directory.</p>
+                        <a href="{% url 'client_create' %}" class="btn btn-primary">Add Your First Client</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

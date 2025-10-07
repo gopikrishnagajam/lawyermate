@@ -1,0 +1,436 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ case.case_number }} - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'diary_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Cases</a></li>
+                    <li class="breadcrumb-item active">{{ case.case_number }}</li>
+                </ol>
+            </nav>
+            <h2>📂 {{ case.case_number }}</h2>
+            <p class="text-muted mb-0">{{ case.case_title }}</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-cog"></i> Actions
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit Case</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-calendar-plus"></i> Add Hearing</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-file-upload"></i> Add Document</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-tasks"></i> Add Task</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-print"></i> Print Summary</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Case Overview -->
+        <div class="col-md-8">
+            <!-- Case Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Case Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Case Number:</strong></td>
+                                    <td>{{ case.case_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Case Type:</strong></td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ case.get_case_type_display }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Filing Date:</strong></td>
+                                    <td>{{ case.filing_date|date:"d M Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        <span class="badge {% if case.status == 'ACTIVE' %}bg-success{% elif case.status == 'WON' %}bg-primary{% elif case.status == 'LOST' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                            {{ case.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priority:</strong></td>
+                                    <td>
+                                        <span class="badge {% if case.priority == 'URGENT' %}bg-danger{% elif case.priority == 'HIGH' %}bg-warning text-dark{% elif case.priority == 'MEDIUM' %}bg-info{% else %}bg-light text-dark{% endif %}">
+                                            {{ case.get_priority_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Client:</strong></td>
+                                    <td>{{ case.client.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Court:</strong></td>
+                                    <td>
+                                        {{ case.court.name }}
+                                        <br>
+                                        <small class="text-muted">{{ case.court.get_court_type_display }} - {{ case.court.location }}</small>
+                                    </td>
+                                </tr>
+                                {% if case.case_value %}
+                                <tr>
+                                    <td><strong>Case Value:</strong></td>
+                                    <td>₹{{ case.case_value|floatformat:0 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if case.next_hearing_date %}
+                                <tr>
+                                    <td><strong>Next Hearing:</strong></td>
+                                    <td>
+                                        {{ case.next_hearing_date|date:"d M Y H:i" }}
+                                        {% if case.is_hearing_today %}
+                                            <span class="badge bg-warning">Today</span>
+                                        {% elif case.is_hearing_overdue %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if case.limitation_date %}
+                                <tr>
+                                    <td><strong>Limitation Date:</strong></td>
+                                    <td>{{ case.limitation_date|date:"d M Y" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Description -->
+            {% if case.description %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Case Description</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ case.description|linebreaksbr }}</p>
+                    {% if case.legal_issues %}
+                    <hr>
+                    <h6>⚖️ Legal Issues:</h6>
+                    <p>{{ case.legal_issues|linebreaksbr }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Hearings Tab -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📅 Hearings ({{ total_hearings }})</h5>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add Hearing
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if hearings %}
+                        <div class="timeline">
+                            {% for hearing in hearings %}
+                            <div class="timeline-item {% if hearing.is_today %}bg-warning bg-opacity-25{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            {{ hearing.get_hearing_type_display }}
+                                            {% if hearing.is_today %}
+                                            <span class="badge bg-warning">Today</span>
+                                            {% endif %}
+                                        </h6>
+                                        <p class="text-muted mb-1">
+                                            <i class="fas fa-calendar"></i> {{ hearing.hearing_date|date:"d M Y H:i" }}
+                                            {% if hearing.court_room %}
+                                            | <i class="fas fa-door-open"></i> Room {{ hearing.court_room }}
+                                            {% endif %}
+                                            {% if hearing.judge_name %}
+                                            | <i class="fas fa-user-tie"></i> {{ hearing.judge_name }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <span class="badge {% if hearing.status == 'COMPLETED' %}bg-success{% elif hearing.status == 'ADJOURNED' %}bg-warning{% elif hearing.status == 'CANCELLED' %}bg-danger{% else %}bg-primary{% endif %}">
+                                        {{ hearing.get_status_display }}
+                                    </span>
+                                </div>
+                                
+                                {% if hearing.purpose %}
+                                <p class="mb-2"><strong>Purpose:</strong> {{ hearing.purpose }}</p>
+                                {% endif %}
+                                
+                                {% if hearing.outcome %}
+                                <p class="mb-2"><strong>Outcome:</strong> {{ hearing.outcome }}</p>
+                                {% endif %}
+                                
+                                {% if hearing.next_date %}
+                                <p class="mb-0 text-info">
+                                    <i class="fas fa-arrow-right"></i> Next hearing: {{ hearing.next_date|date:"d M Y H:i" }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% if not forloop.last %}<hr>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hearings scheduled yet</p>
+                            <button class="btn btn-primary">Schedule First Hearing</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📄 Documents ({{ documents.count }})</h5>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fas fa-upload"></i> Upload Document
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                        <div class="list-group list-group-flush">
+                            {% for document in documents %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-file-alt text-primary"></i> {{ document.title }}
+                                        </h6>
+                                        <p class="mb-1 text-muted">{{ document.get_document_type_display }}</p>
+                                        <small class="text-muted">
+                                            Document Date: {{ document.document_date|date:"d M Y" }}
+                                            | Added: {{ document.created_at|date:"d M Y" }}
+                                            {% if document.is_original %}
+                                            <span class="badge bg-success ms-2">Original</span>
+                                            {% endif %}
+                                            {% if document.is_certified_copy %}
+                                            <span class="badge bg-info ms-1">Certified Copy</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if document.description %}
+                                <p class="mb-0 mt-2 small">{{ document.description }}</p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No documents uploaded yet</p>
+                            <button class="btn btn-primary">Upload First Document</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Case Statistics -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Case Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary">{{ total_hearings }}</h4>
+                                <small class="text-muted">Total Hearings</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ completed_hearings }}</h4>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-warning">{{ upcoming_hearings }}</h4>
+                                <small class="text-muted">Upcoming</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info">{{ documents.count }}</h4>
+                            <small class="text-muted">Documents</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Information -->
+            {% if case.fees_charged %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Financial Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="small text-muted">Total Fees</label>
+                        <div class="h5 text-primary">₹{{ case.fees_charged|floatformat:0 }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-muted">Amount Received</label>
+                        <div class="h6 text-success">₹{{ case.fees_received|floatformat:0 }}</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="small text-muted">Pending Amount</label>
+                        <div class="h6 {% if case.get_pending_fees > 0 %}text-danger{% else %}text-success{% endif %}">
+                            ₹{{ case.get_pending_fees|floatformat:0 }}
+                        </div>
+                    </div>
+                    {% if case.get_pending_fees > 0 %}
+                    <hr>
+                    <button class="btn btn-sm btn-success w-100">
+                        <i class="fas fa-rupee-sign"></i> Record Payment
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Client Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">👤 Client Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">{{ case.client.name }}</h6>
+                    {% if case.client.phone %}
+                    <p class="mb-1">
+                        <i class="fas fa-phone text-muted"></i> 
+                        <a href="tel:{{ case.client.phone }}">{{ case.client.phone }}</a>
+                    </p>
+                    {% endif %}
+                    {% if case.client.email %}
+                    <p class="mb-1">
+                        <i class="fas fa-envelope text-muted"></i> 
+                        <a href="mailto:{{ case.client.email }}">{{ case.client.email }}</a>
+                    </p>
+                    {% endif %}
+                    {% if case.client.address %}
+                    <p class="mb-1">
+                        <i class="fas fa-map-marker-alt text-muted"></i> {{ case.client.address|truncatechars:50 }}
+                    </p>
+                    {% endif %}
+                    <hr>
+                    <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-user"></i> View Client Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Case Tasks -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">📋 Case Tasks</h5>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in tasks %}
+                            <div class="list-group-item border-0 px-0 {% if task.is_overdue %}bg-danger bg-opacity-10{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 {% if task.is_completed %}text-decoration-line-through text-muted{% endif %}">
+                                            {{ task.title }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            Due: {{ task.due_date|date:"d M Y H:i" }}
+                                            {% if task.is_overdue and not task.is_completed %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    {% if not task.is_completed %}
+                                    <button class="btn btn-sm btn-outline-success" onclick="markCompleted('{{ task.id }}')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-tasks fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small">No tasks created</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+function markCompleted(taskId) {
+    fetch(`/diary/tasks/${taskId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error marking task as completed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking task as completed');
+    });
+}
+</script>
+{% endblock %}

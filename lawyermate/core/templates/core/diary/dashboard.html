@@ -1,0 +1,335 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Electronic Diary - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📚 Electronic Diary Dashboard</h2>
+            <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+        </div>
+        <div>
+            <div class="btn-group" role="group">
+                <a href="{% url 'case_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Case
+                </a>
+                <a href="{% url 'client_create' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-user-plus"></i> New Client
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_cases }}</h4>
+                            <p class="mb-0">Total Cases</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-briefcase fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ active_cases }}</h4>
+                            <p class="mb-0">Active Cases</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_clients }}</h4>
+                            <p class="mb-0">Total Clients</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ today_hearings.count }}</h4>
+                            <p class="mb-0">Today's Hearings</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-day fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Today's Hearings -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📅 Today's Hearings</h5>
+                    <a href="{% url 'hearing_list' %}?date_filter=today" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if today_hearings %}
+                        <div class="list-group list-group-flush">
+                            {% for hearing in today_hearings %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">{{ hearing.case.case_number }}</div>
+                                    <small class="text-muted">{{ hearing.case.client.name }}</small>
+                                    <div class="small">
+                                        <i class="fas fa-clock"></i> {{ hearing.hearing_date|date:"H:i" }}
+                                        {% if hearing.court_room %}
+                                        | Room: {{ hearing.court_room }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary">{{ hearing.get_hearing_type_display }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hearings scheduled for today</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Hearings -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📆 Upcoming Hearings</h5>
+                    <a href="{% url 'hearing_list' %}?date_filter=this_week" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_hearings %}
+                        <div class="list-group list-group-flush">
+                            {% for hearing in upcoming_hearings %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">{{ hearing.case.case_number }}</div>
+                                    <small class="text-muted">{{ hearing.case.client.name }}</small>
+                                    <div class="small">
+                                        <i class="fas fa-calendar"></i> {{ hearing.hearing_date|date:"d M Y H:i" }}
+                                    </div>
+                                </div>
+                                <span class="badge bg-secondary">{{ hearing.get_hearing_type_display }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No upcoming hearings this week</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Pending Tasks -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Pending Tasks</h5>
+                    <a href="{% url 'task_list' %}?status=pending" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if pending_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in pending_tasks %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">{{ task.title }}</div>
+                                    {% if task.case %}
+                                    <small class="text-muted">Case: {{ task.case.case_number }}</small>
+                                    {% endif %}
+                                    <div class="small">
+                                        <i class="fas fa-clock"></i> Due: {{ task.due_date|date:"d M Y H:i" }}
+                                    </div>
+                                </div>
+                                <span class="badge {% if task.priority == 'URGENT' %}bg-danger{% elif task.priority == 'HIGH' %}bg-warning{% else %}bg-info{% endif %}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No pending tasks</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Tasks -->
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">⚠️ Overdue Tasks</h5>
+                    <a href="{% url 'task_list' %}?status=overdue" class="btn btn-sm btn-outline-light">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if overdue_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in overdue_tasks %}
+                            <div class="list-group-item d-flex justify-content-between align-items-start border-0">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold text-danger">{{ task.title }}</div>
+                                    {% if task.case %}
+                                    <small class="text-muted">Case: {{ task.case.case_number }}</small>
+                                    {% endif %}
+                                    <div class="small text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Overdue: {{ task.due_date|date:"d M Y H:i" }}
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success" onclick="markCompleted('{{ task.id }}')">
+                                    <i class="fas fa-check"></i> Complete
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">No overdue tasks! Great job!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Cases -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📂 Recent Cases</h5>
+                    <a href="{% url 'case_list' %}" class="btn btn-sm btn-outline-primary">View All Cases</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_cases %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Case Number</th>
+                                        <th>Client</th>
+                                        <th>Case Type</th>
+                                        <th>Status</th>
+                                        <th>Next Hearing</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for case in recent_cases %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ case.case_number }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ case.case_title|truncatechars:30 }}</small>
+                                        </td>
+                                        <td>{{ case.client.name }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ case.get_case_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if case.status == 'ACTIVE' %}bg-success{% elif case.status == 'WON' %}bg-primary{% elif case.status == 'LOST' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ case.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if case.next_hearing_date %}
+                                                {{ case.next_hearing_date|date:"d M Y" }}
+                                                {% if case.is_hearing_today %}
+                                                    <span class="badge bg-warning">Today</span>
+                                                {% elif case.is_hearing_overdue %}
+                                                    <span class="badge bg-danger">Overdue</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <small class="text-muted">Not scheduled</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'case_detail' case.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No cases found. <a href="{% url 'case_create' %}">Create your first case</a></p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+function markCompleted(taskId) {
+    fetch(`/diary/tasks/${taskId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error marking task as completed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking task as completed');
+    });
+}
+</script>
+{% endblock %}

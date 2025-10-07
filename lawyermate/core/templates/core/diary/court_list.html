@@ -1,0 +1,318 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Indian Courts Directory - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>🏛️ Indian Courts Directory</h2>
+            <p class="text-muted mb-0">Browse courts across India</p>
+        </div>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#courtInfoModal">
+            <i class="fas fa-info-circle"></i> Court Hierarchy Guide
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" name="search" class="form-control" placeholder="Search courts..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="court_type" class="form-select">
+                        <option value="">All Court Types</option>
+                        {% for value, label in court_type_choices %}
+                        <option value="{{ value }}" {% if value == court_type_filter %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="state" class="form-control" placeholder="Filter by state..." value="{{ state_filter }}">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Courts Grid -->
+    <div class="row">
+        {% if courts %}
+            {% for court in courts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="badge 
+                            {% if court.court_type == 'SC' %}bg-danger
+                            {% elif court.court_type == 'HC' %}bg-primary
+                            {% elif court.court_type == 'DC' %}bg-success
+                            {% elif court.court_type == 'SC_MAG' %}bg-warning text-dark
+                            {% elif court.court_type == 'FAMILY' %}bg-info
+                            {% elif court.court_type == 'CONSUMER' %}bg-secondary
+                            {% else %}bg-light text-dark
+                            {% endif %}">
+                            {{ court.get_court_type_display }}
+                        </span>
+                        <small class="text-muted">{{ court.state }}</small>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h6 class="card-title">{{ court.name }}</h6>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt text-muted"></i> 
+                            {{ court.location }}
+                        </p>
+                        
+                        {% if court.address %}
+                        <div class="mb-2">
+                            <small class="text-muted"><strong>Address:</strong></small>
+                            <p class="small">{{ court.address }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if court.contact_info %}
+                        <div class="mb-2">
+                            <small class="text-muted"><strong>Contact:</strong></small>
+                            <p class="small">{{ court.contact_info }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="court-stats mt-3">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-primary">{{ court.cases.count }}</div>
+                                    <small class="text-muted">Your Cases</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-success">{{ court.cases.all|length }}</div>
+                                    <small class="text-muted">Total</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-sm btn-outline-primary" title="View Cases" onclick="viewCourtCases('{{ court.id }}')">
+                                <i class="fas fa-briefcase"></i> Cases
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" title="Court Details" onclick="showCourtDetails('{{ court.id }}')">
+                                <i class="fas fa-info"></i> Details
+                            </button>
+                            <a href="{% url 'case_create' %}?court={{ court.id }}" class="btn btn-sm btn-outline-success" title="New Case">
+                                <i class="fas fa-plus"></i> New
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if courts.has_other_pages %}
+            <div class="col-12">
+                <nav aria-label="Courts pagination" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if courts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ courts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if court_type_filter %}&court_type={{ court_type_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in courts.paginator.page_range %}
+                        {% if courts.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > courts.number|add:'-3' and num < courts.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if court_type_filter %}&court_type={{ court_type_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if courts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ courts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if court_type_filter %}&court_type={{ court_type_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    {% if search_query or court_type_filter or state_filter %}
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No courts found</h5>
+                        <p class="text-muted">No courts match your search criteria.</p>
+                        <a href="{% url 'court_list' %}" class="btn btn-outline-primary">Clear Filters</a>
+                    {% else %}
+                        <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                        <h5>No courts available</h5>
+                        <p class="text-muted">The courts database appears to be empty.</p>
+                        <div class="alert alert-info mt-3">
+                            <strong>Setup Required:</strong> Run the following command to populate Indian courts:
+                            <br>
+                            <code>python manage.py populate_courts</code>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Court Hierarchy Guide Modal -->
+<div class="modal fade" id="courtInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🏛️ Indian Court System Hierarchy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Constitutional Courts</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-danger me-2">SC</span>
+                                <strong>Supreme Court of India</strong>
+                                <br><small class="text-muted">Final appellate court, constitutional matters</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-primary me-2">HC</span>
+                                <strong>High Courts</strong>
+                                <br><small class="text-muted">State-level constitutional courts</small>
+                            </li>
+                        </ul>
+                        
+                        <h6 class="text-success mt-4">Civil & Criminal Courts</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-success me-2">DC</span>
+                                <strong>District Courts</strong>
+                                <br><small class="text-muted">Civil suits, sessions cases</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-warning text-dark me-2">Sessions</span>
+                                <strong>Sessions Courts</strong>
+                                <br><small class="text-muted">Serious criminal cases</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-secondary me-2">MAG</span>
+                                <strong>Magistrate Courts</strong>
+                                <br><small class="text-muted">Minor criminal cases, judicial magistrate</small>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-info">Specialized Courts</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-info me-2">Family</span>
+                                <strong>Family Courts</strong>
+                                <br><small class="text-muted">Matrimonial, divorce, custody</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-secondary me-2">Consumer</span>
+                                <strong>Consumer Courts</strong>
+                                <br><small class="text-muted">Consumer protection cases</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-dark me-2">Labour</span>
+                                <strong>Labour Courts</strong>
+                                <br><small class="text-muted">Industrial disputes</small>
+                            </li>
+                        </ul>
+                        
+                        <h6 class="text-warning mt-4">Tribunals</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-light text-dark me-2">Tribunal</span>
+                                <strong>Various Tribunals</strong>
+                                <br><small class="text-muted">Tax, environment, telecom, etc.</small>
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-warning text-dark me-2">DRT</span>
+                                <strong>Debts Recovery Tribunals</strong>
+                                <br><small class="text-muted">Banking recovery cases</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-lightbulb"></i> Practice Tips</h6>
+                    <ul class="mb-0 small">
+                        <li>Check court jurisdiction before filing cases</li>
+                        <li>Verify court timings and holidays</li>
+                        <li>Keep updated contact information</li>
+                        <li>Understand local court procedures</li>
+                        <li>Maintain good relationships with court staff</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+function viewCourtCases(courtId) {
+    // Redirect to case list filtered by court
+    window.location.href = `/diary/cases/?court=${courtId}`;
+}
+
+function showCourtDetails(courtId) {
+    // You can implement a modal or detailed view here
+    alert(`Court details functionality can be implemented here for court ID: ${courtId}`);
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.court-stats {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+}
+
+.badge {
+    font-size: 0.75em;
+    min-width: 50px;
+}
+</style>
+{% endblock %}

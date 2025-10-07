@@ -1,0 +1,270 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Create New Case - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'diary_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Cases</a></li>
+                    <li class="breadcrumb-item active">Create New Case</li>
+                </ol>
+            </nav>
+            <h2>📝 Create New Case</h2>
+            <p class="text-muted mb-0">Add a new legal case to your diary</p>
+        </div>
+    </div>
+
+    <!-- Create Case Form -->
+    <div class="card">
+        <div class="card-body">
+            <form method="post" id="caseCreateForm">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Basic Case Information -->
+                    <div class="col-md-8">
+                        <h5 class="mb-3">📋 Basic Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="case_number" class="form-label">Case Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="case_number" name="case_number" required 
+                                       placeholder="e.g., CS 123/2024">
+                                <small class="form-text text-muted">Official court case number</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filing_date" class="form-label">Filing Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="filing_date" name="filing_date" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="case_title" class="form-label">Case Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="case_title" name="case_title" required 
+                                   placeholder="Brief description of the case">
+                            <small class="form-text text-muted">A short, descriptive title for the case</small>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="client" class="form-label">Client <span class="text-danger">*</span></label>
+                                <select class="form-select" id="client" name="client" required>
+                                    <option value="">Select Client</option>
+                                    {% for client in clients %}
+                                    <option value="{{ client.id }}">{{ client.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">
+                                    <a href="{% url 'client_create' %}" target="_blank">Create new client</a> if not listed
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="court" class="form-label">Court <span class="text-danger">*</span></label>
+                                <select class="form-select" id="court" name="court" required>
+                                    <option value="">Select Court</option>
+                                    {% for court in courts %}
+                                    <option value="{{ court.id }}">{{ court.name }} ({{ court.get_court_type_display }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="case_type" class="form-label">Case Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="case_type" name="case_type" required>
+                                    <option value="">Select Type</option>
+                                    {% for value, label in case_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if value == 'ACTIVE' %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    {% for value, label in priority_choices %}
+                                    <option value="{{ value }}" {% if value == 'MEDIUM' %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Case Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required 
+                                      placeholder="Detailed description of the case, facts, and circumstances"></textarea>
+                            <small class="form-text text-muted">Provide a comprehensive overview of the case</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="legal_issues" class="form-label">Legal Issues</label>
+                            <textarea class="form-control" id="legal_issues" name="legal_issues" rows="3" 
+                                      placeholder="Key legal issues, sections of law involved, precedents"></textarea>
+                            <small class="form-text text-muted">Legal provisions, sections, and key issues involved</small>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="col-md-4">
+                        <h5 class="mb-3">💰 Financial & Timeline</h5>
+                        
+                        <div class="mb-3">
+                            <label for="case_value" class="form-label">Case Value (₹)</label>
+                            <input type="number" class="form-control" id="case_value" name="case_value" step="0.01" 
+                                   placeholder="0.00">
+                            <small class="form-text text-muted">Monetary value of the dispute (if applicable)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fees_charged" class="form-label">Fees Charged (₹)</label>
+                            <input type="number" class="form-control" id="fees_charged" name="fees_charged" step="0.01" 
+                                   placeholder="0.00">
+                            <small class="form-text text-muted">Your legal fees for this case</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="next_hearing_date" class="form-label">Next Hearing Date</label>
+                            <input type="datetime-local" class="form-control" id="next_hearing_date" name="next_hearing_date">
+                            <small class="form-text text-muted">First hearing or next scheduled hearing</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="limitation_date" class="form-label">Limitation Date</label>
+                            <input type="date" class="form-control" id="limitation_date" name="limitation_date">
+                            <small class="form-text text-muted">Limitation period expiry (if applicable)</small>
+                        </div>
+
+                        <!-- Indian Legal System Guide -->
+                        <div class="card bg-light mt-4">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">⚖️ Indian Legal System Guide</h6>
+                            </div>
+                            <div class="card-body small">
+                                <h6>Common Case Types:</h6>
+                                <ul class="mb-2">
+                                    <li><strong>Civil:</strong> Property disputes, contracts</li>
+                                    <li><strong>Criminal:</strong> FIR, bail, trial</li>
+                                    <li><strong>Family:</strong> Divorce, custody</li>
+                                    <li><strong>Matrimonial:</strong> 498A, DV Act</li>
+                                    <li><strong>Cheque Bounce:</strong> Sec 138 NI Act</li>
+                                    <li><strong>Consumer:</strong> Consumer Protection Act</li>
+                                </ul>
+                                
+                                <h6>Court Hierarchy:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Supreme Court:</strong> Final appeals</li>
+                                    <li><strong>High Court:</strong> State level</li>
+                                    <li><strong>District Court:</strong> Civil & Sessions</li>
+                                    <li><strong>Magistrate:</strong> Criminal matters</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'case_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <div>
+                        <button type="submit" class="btn btn-success me-2" name="action" value="save_and_continue">
+                            <i class="fas fa-save"></i> Save & Continue Editing
+                        </button>
+                        <button type="submit" class="btn btn-primary" name="action" value="save">
+                            <i class="fas fa-check"></i> Create Case
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default for filing date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('filing_date').value = today;
+    
+    // Auto-generate case title based on client and case type
+    const clientSelect = document.getElementById('client');
+    const caseTypeSelect = document.getElementById('case_type');
+    const caseTitleInput = document.getElementById('case_title');
+    
+    function updateCaseTitle() {
+        const clientText = clientSelect.selectedOptions[0]?.text || '';
+        const caseTypeText = caseTypeSelect.selectedOptions[0]?.text || '';
+        
+        if (clientText && caseTypeText && !caseTitleInput.value) {
+            caseTitleInput.value = `${clientText} vs. - ${caseTypeText}`;
+        }
+    }
+    
+    clientSelect.addEventListener('change', updateCaseTitle);
+    caseTypeSelect.addEventListener('change', updateCaseTitle);
+    
+    // Form validation
+    document.getElementById('caseCreateForm').addEventListener('submit', function(e) {
+        const requiredFields = ['case_number', 'case_title', 'client', 'court', 'case_type', 'description'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+});
+</script>
+
+<style>
+.form-label {
+    font-weight: 600;
+}
+
+.form-text {
+    font-size: 0.875rem;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+{% endblock %}

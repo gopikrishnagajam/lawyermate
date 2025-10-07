@@ -1,0 +1,525 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Home - LawyerMate{% endblock %}
+
+{% block content %}
+<!-- Professional Legal Theme Styles -->
+<style>
+:root {
+    --legal-primary: #1a365d;    /* Deep Navy Blue */
+    --legal-secondary: #2c5aa0;  /* Professional Blue */
+    --legal-accent: #d4b429;     /* Legal Gold */
+    --legal-light: #f7fafc;      /* Light Gray */
+    --legal-dark: #2d3748;       /* Dark Gray */
+    --legal-success: #38a169;    /* Professional Green */
+    --legal-gradient: linear-gradient(135deg, #1a365d 0%, #2c5aa0 100%);
+    --legal-gold-gradient: linear-gradient(135deg, #d4b429 0%, #f6e05e 100%);
+}
+
+.hero-section {
+    background: var(--legal-gradient);
+    color: white;
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="scales" patternUnits="userSpaceOnUse" width="20" height="20" fill="rgba(255,255,255,0.05)"><path d="M10 5L15 15L5 15z M10 15L15 25L5 25z"/></pattern></defs><rect width="100" height="100" fill="url(%23scales)"/></svg>');
+    opacity: 0.1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.feature-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1rem;
+    color: white;
+}
+
+.feature-icon.primary { background: var(--legal-gradient); }
+.feature-icon.secondary { background: linear-gradient(135deg, #38a169 0%, #48bb78 100%); }
+.feature-icon.accent { background: var(--legal-gold-gradient); }
+.feature-icon.info { background: linear-gradient(135deg, #3182ce 0%, #4299e1 100%); }
+.feature-icon.purple { background: linear-gradient(135deg, #805ad5 0%, #9f7aea 100%); }
+.feature-icon.teal { background: linear-gradient(135deg, #319795 0%, #4fd1c7 100%); }
+
+.btn-legal-primary {
+    background: var(--legal-primary);
+    border-color: var(--legal-primary);
+    color: white;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-legal-primary:hover {
+    background: var(--legal-secondary);
+    border-color: var(--legal-secondary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-legal-gold {
+    background: var(--legal-gold-gradient);
+    border: none;
+    color: var(--legal-dark);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-legal-gold:hover {
+    background: linear-gradient(135deg, #b7791f 0%, #d4b429 100%);
+    color: var(--legal-dark);
+    transform: translateY(-2px);
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    border: none;
+}
+
+.coming-soon-badge {
+    background: var(--legal-gold-gradient);
+    color: var(--legal-dark);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-left: 8px;
+}
+
+.section-title {
+    color: var(--legal-primary);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--legal-accent);
+    border-radius: 2px;
+}
+
+.dashboard-preview {
+    background: var(--legal-light);
+    border-radius: 12px;
+    border: 2px solid var(--legal-accent);
+}
+</style>
+
+{% if user.is_authenticated %}
+    <!-- Hero Section for Logged-in Users -->
+    <div class="hero-section p-5 mb-5">
+        <div class="hero-content text-center">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 fw-bold mb-3">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+                    <p class="lead mb-4">Your comprehensive legal practice management system awaits. Manage cases, track deadlines, and serve your clients with excellence.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'diary_dashboard' %}" class="btn btn-legal-gold btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                        <a href="{% url 'case_create' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-plus me-2"></i>New Case
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="feature-icon accent mx-auto mb-3" style="width: 120px; height: 120px; font-size: 4rem;">
+                            ⚖️
+                        </div>
+                        <h4>LawyerMate Pro</h4>
+                        <p class="mb-0">Electronic Diary System</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card p-4 text-center">
+                <div class="feature-icon primary mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    📂
+                </div>
+                <h4 class="fw-bold text-primary mb-1">0</h4>
+                <small class="text-muted">Active Cases</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card p-4 text-center">
+                <div class="feature-icon secondary mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    👥
+                </div>
+                <h4 class="fw-bold text-success mb-1">0</h4>
+                <small class="text-muted">Clients</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card p-4 text-center">
+                <div class="feature-icon accent mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    📅
+                </div>
+                <h4 class="fw-bold" style="color: var(--legal-accent);">0</h4>
+                <small class="text-muted">Hearings Today</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card p-4 text-center">
+                <div class="feature-icon info mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    📋
+                </div>
+                <h4 class="fw-bold text-info mb-1">0</h4>
+                <small class="text-muted">Pending Tasks</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Features Section -->
+    <div class="mb-5">
+        <h2 class="section-title text-center">Your Legal Practice Tools</h2>
+        <div class="row">
+            <!-- Electronic Diary -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon primary">
+                        📚
+                    </div>
+                    <h5 class="fw-bold mb-3">Electronic Diary</h5>
+                    <p class="text-muted mb-4">Complete case management system designed for Indian lawyers with court integration.</p>
+                    <a href="{% url 'diary_dashboard' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-arrow-right me-2"></i>Open Diary
+                    </a>
+                </div>
+            </div>
+
+            <!-- Case Management -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon secondary">
+                        ⚖️
+                    </div>
+                    <h5 class="fw-bold mb-3">Case Management</h5>
+                    <p class="text-muted mb-4">Track legal cases from filing to judgment with Indian legal system integration.</p>
+                    <a href="{% url 'case_list' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-briefcase me-2"></i>Manage Cases
+                    </a>
+                </div>
+            </div>
+
+            <!-- Client Directory -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon accent">
+                        👥
+                    </div>
+                    <h5 class="fw-bold mb-3">Client Directory</h5>
+                    <p class="text-muted mb-4">Comprehensive client management with Aadhar and PAN integration for Indian clients.</p>
+                    <a href="{% url 'client_list' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-users me-2"></i>View Clients
+                    </a>
+                </div>
+            </div>
+
+            <!-- Court Calendar -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon info">
+                        📅
+                    </div>
+                    <h5 class="fw-bold mb-3">Court Calendar</h5>
+                    <p class="text-muted mb-4">Schedule and track court hearings with automated reminders and case updates.</p>
+                    <a href="{% url 'hearing_list' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-calendar-alt me-2"></i>View Hearings
+                    </a>
+                </div>
+            </div>
+
+            <!-- Task Management -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon purple">
+                        📋
+                    </div>
+                    <h5 class="fw-bold mb-3">Task Management</h5>
+                    <p class="text-muted mb-4">Never miss deadlines with intelligent task tracking and legal deadline management.</p>
+                    <a href="{% url 'task_list' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-tasks me-2"></i>View Tasks
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Management -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon teal">
+                        👤
+                    </div>
+                    <h5 class="fw-bold mb-3">Profile Management</h5>
+                    <p class="text-muted mb-4">Manage your professional profile, preferences, and account security settings.</p>
+                    <a href="{% url 'profile' %}" class="btn btn-legal-primary">
+                        <i class="fas fa-user-cog me-2"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coming Soon Features -->
+    <div class="mb-5">
+        <h2 class="section-title text-center">Coming Soon</h2>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center" style="opacity: 0.7;">
+                    <div class="feature-icon primary">
+                        📊
+                    </div>
+                    <h6 class="fw-bold">Analytics & Reports</h6>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center" style="opacity: 0.7;">
+                    <div class="feature-icon secondary">
+                        📱
+                    </div>
+                    <h6 class="fw-bold">Mobile App</h6>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center" style="opacity: 0.7;">
+                    <div class="feature-icon accent">
+                        🤖
+                    </div>
+                    <h6 class="fw-bold">AI Legal Assistant</h6>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center" style="opacity: 0.7;">
+                    <div class="feature-icon info">
+                        📄
+                    </div>
+                    <h6 class="fw-bold">Document Templates</h6>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Hero Section for Non-authenticated Users -->
+    <div class="hero-section p-5 mb-5">
+        <div class="hero-content text-center">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h1 class="display-3 fw-bold mb-3">⚖️ LawyerMate</h1>
+                    <h2 class="h4 mb-4 opacity-75">Complete Legal Practice Management System</h2>
+                    <p class="lead mb-4">Streamline your legal practice with our comprehensive Electronic Diary system designed specifically for Indian lawyers. Manage cases, track deadlines, and serve your clients with excellence.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'signup' %}" class="btn btn-legal-gold btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Start Free Trial
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="dashboard-preview p-4 mt-4 mt-md-0">
+                        <div class="text-center">
+                            <div class="feature-icon accent mx-auto mb-3" style="width: 100px; height: 100px; font-size: 3.5rem;">
+                                📚
+                            </div>
+                            <h5 class="fw-bold" style="color: var(--legal-primary);">Electronic Diary</h5>
+                            <p class="small text-muted">Built for Indian Legal System</p>
+                        </div>
+                        <div class="row text-center mt-3">
+                            <div class="col-4">
+                                <div class="small">
+                                    <strong style="color: var(--legal-primary);">37+</strong><br>
+                                    <span class="text-muted">Courts</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="small">
+                                    <strong style="color: var(--legal-success);">17</strong><br>
+                                    <span class="text-muted">Case Types</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="small">
+                                    <strong style="color: var(--legal-accent);">100%</strong><br>
+                                    <span class="text-muted">Secure</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Preview for Non-authenticated Users -->
+    <div class="mb-5">
+        <h2 class="section-title text-center">Powerful Features for Legal Professionals</h2>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon primary">
+                        📂
+                    </div>
+                    <h5 class="fw-bold mb-3">Case Management</h5>
+                    <p class="text-muted mb-4">Complete case lifecycle management from filing to judgment with Indian court integration.</p>
+                    <ul class="text-start text-muted small">
+                        <li>17+ Indian case types supported</li>
+                        <li>Court hearing scheduling</li>
+                        <li>Document management</li>
+                        <li>Financial tracking</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon secondary">
+                        🏛️
+                    </div>
+                    <h5 class="fw-bold mb-3">Court Directory</h5>
+                    <p class="text-muted mb-4">Comprehensive database of Indian courts from Supreme Court to District Courts.</p>
+                    <ul class="text-start text-muted small">
+                        <li>37+ pre-loaded Indian courts</li>
+                        <li>Complete court hierarchy</li>
+                        <li>Contact information</li>
+                        <li>Jurisdiction details</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon accent">
+                        👥
+                    </div>
+                    <h5 class="fw-bold mb-3">Client Management</h5>
+                    <p class="text-muted mb-4">Secure client data management with Indian identification integration.</p>
+                    <ul class="text-start text-muted small">
+                        <li>Aadhar & PAN integration</li>
+                        <li>Secure data storage</li>
+                        <li>Client communication logs</li>
+                        <li>Case relationship tracking</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon info">
+                        📅
+                    </div>
+                    <h5 class="fw-bold mb-3">Smart Calendar</h5>
+                    <p class="text-muted mb-4">Never miss court dates with intelligent scheduling and reminders.</p>
+                    <ul class="text-start text-muted small">
+                        <li>Court hearing alerts</li>
+                        <li>Deadline tracking</li>
+                        <li>Limitation period warnings</li>
+                        <li>Task management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon purple">
+                        🔒
+                    </div>
+                    <h5 class="fw-bold mb-3">Enterprise Security</h5>
+                    <p class="text-muted mb-4">Bank-level security with JWT authentication and data encryption.</p>
+                    <ul class="text-start text-muted small">
+                        <li>HTTP-Only cookie authentication</li>
+                        <li>XSS & CSRF protection</li>
+                        <li>Data encryption at rest</li>
+                        <li>Audit logging</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 text-center">
+                    <div class="feature-icon teal">
+                        📱
+                    </div>
+                    <h5 class="fw-bold mb-3">Mobile Ready</h5>
+                    <p class="text-muted mb-4">Access your legal practice from anywhere with responsive design.</p>
+                    <ul class="text-start text-muted small">
+                        <li>Responsive web design</li>
+                        <li>Mobile-optimized interface</li>
+                        <li>Offline capability ready</li>
+                        <li>Cross-platform support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mb-5">
+        <div class="hero-section p-5" style="background: var(--legal-gold-gradient);">
+            <div class="hero-content" style="color: var(--legal-dark);">
+                <h3 class="fw-bold mb-3">Ready to Transform Your Legal Practice?</h3>
+                <p class="lead mb-4">Join hundreds of Indian lawyers already using LawyerMate to streamline their practice.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'signup' %}" class="btn btn-legal-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Get Started Today
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+    </div>
+</div>
+{% endblock %}

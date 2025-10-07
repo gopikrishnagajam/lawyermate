@@ -1,0 +1,355 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Tasks & Reminders - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📋 Tasks & Reminders</h2>
+            <p class="text-muted mb-0">Manage your legal tasks and deadlines</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="fas fa-plus"></i> Add Task
+        </button>
+    </div>
+
+    <!-- Filters & Stats -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <select name="status" class="form-select">
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Tasks</option>
+                                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>Overdue</option>
+                                <option value="" {% if not status_filter %}selected{% endif %}>All Tasks</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="priority" class="form-select">
+                                <option value="">All Priorities</option>
+                                {% for value, label in priority_choices %}
+                                <option value="{{ value }}" {% if value == priority_filter %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-gradient bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">Task Summary</h5>
+                    <div class="row">
+                        <div class="col-4">
+                            <h6 class="mb-0">{{ tasks.paginator.count }}</h6>
+                            <small>Total</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="mb-0" id="pendingCount">-</h6>
+                            <small>Pending</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="mb-0" id="overdueCount">-</h6>
+                            <small>Overdue</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="row">
+        {% if tasks %}
+            {% for task in tasks %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 
+                    {% if task.is_overdue and not task.is_completed %}border-danger
+                    {% elif task.is_completed %}border-success
+                    {% elif task.priority == 'URGENT' %}border-warning
+                    {% endif %}">
+                    
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="badge 
+                            {% if task.priority == 'URGENT' %}bg-danger
+                            {% elif task.priority == 'HIGH' %}bg-warning text-dark
+                            {% elif task.priority == 'MEDIUM' %}bg-info
+                            {% else %}bg-secondary
+                            {% endif %}">
+                            {{ task.get_priority_display }}
+                        </span>
+                        
+                        <div class="task-status">
+                            {% if task.is_completed %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Completed
+                                </span>
+                            {% elif task.is_overdue %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-exclamation-triangle"></i> Overdue
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-clock"></i> Pending
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h6 class="card-title {% if task.is_completed %}text-decoration-line-through text-muted{% endif %}">
+                            {{ task.title }}
+                        </h6>
+                        
+                        {% if task.case %}
+                        <p class="card-text small text-primary mb-2">
+                            <i class="fas fa-briefcase"></i> 
+                            <a href="{% url 'case_detail' task.case.id %}" class="text-decoration-none">
+                                {{ task.case.case_number }}
+                            </a>
+                        </p>
+                        {% endif %}
+                        
+                        <p class="card-text">{{ task.description|truncatechars:80 }}</p>
+                        
+                        <div class="task-meta mb-3">
+                            <p class="mb-1 small">
+                                <i class="fas fa-tag text-muted"></i> 
+                                {{ task.get_task_type_display }}
+                            </p>
+                            <p class="mb-1 small">
+                                <i class="fas fa-calendar-alt text-muted"></i> 
+                                Due: {{ task.due_date|date:"d M Y H:i" }}
+                            </p>
+                            {% if task.reminder_date %}
+                            <p class="mb-1 small">
+                                <i class="fas fa-bell text-muted"></i> 
+                                Reminder: {{ task.reminder_date|date:"d M Y H:i" }}
+                            </p>
+                            {% endif %}
+                            {% if task.completed_date %}
+                            <p class="mb-0 small text-success">
+                                <i class="fas fa-check-circle"></i> 
+                                Completed: {{ task.completed_date|date:"d M Y H:i" }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Time remaining indicator -->
+                        {% if not task.is_completed %}
+                        <div class="time-remaining mb-2">
+                            {% now "Y-m-d H:i:s" as current_time %}
+                            {% if task.is_overdue %}
+                                <div class="alert alert-danger py-2 mb-0">
+                                    <small><i class="fas fa-exclamation-triangle"></i> Task overdue!</small>
+                                </div>
+                            {% else %}
+                                <div class="progress mb-1" style="height: 5px;">
+                                    <div class="progress-bar 
+                                        {% if task.priority == 'URGENT' %}bg-danger
+                                        {% elif task.priority == 'HIGH' %}bg-warning
+                                        {% else %}bg-info
+                                        {% endif %}" 
+                                        style="width: 60%"></div>
+                                </div>
+                                <small class="text-muted">Due soon</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                            {% if not task.is_completed %}
+                            <button class="btn btn-sm btn-success" onclick="markCompleted('{{ task.id }}')" title="Mark Complete">
+                                <i class="fas fa-check"></i> Complete
+                            </button>
+                            {% endif %}
+                            
+                            <button class="btn btn-sm btn-outline-secondary" title="Edit Task">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            
+                            {% if task.case %}
+                            <a href="{% url 'case_detail' task.case.id %}" class="btn btn-sm btn-outline-primary" title="View Case">
+                                <i class="fas fa-briefcase"></i> Case
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if tasks.has_other_pages %}
+            <div class="col-12">
+                <nav aria-label="Tasks pagination" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if tasks.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tasks.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in tasks.paginator.page_range %}
+                        {% if tasks.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > tasks.number|add:'-3' and num < tasks.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if tasks.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tasks.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    {% if status_filter or priority_filter %}
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No tasks found</h5>
+                        <p class="text-muted">No tasks match your current filters.</p>
+                        <a href="{% url 'task_list' %}" class="btn btn-outline-primary">Clear Filters</a>
+                    {% else %}
+                        <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                        <h5>No tasks created</h5>
+                        <p class="text-muted">You haven't created any tasks or reminders yet.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                            Create Your First Task
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+function markCompleted(taskId) {
+    // Add loading state
+    const button = document.querySelector(`button[onclick="markCompleted('${taskId}')"]`);
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Completing...';
+    button.disabled = true;
+    
+    fetch(`/diary/tasks/${taskId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Reload page after short delay
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            alert('Error marking task as completed');
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking task as completed');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+// Add CSRF token to page
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        document.body.appendChild(csrfInput);
+    }
+});
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.task-meta p {
+    margin-bottom: 0.25rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.bg-gradient {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+}
+
+.border-danger {
+    border-color: #dc3545 !important;
+    border-width: 2px !important;
+}
+
+.border-success {
+    border-color: #198754 !important;
+    border-width: 2px !important;
+}
+
+.border-warning {
+    border-color: #ffc107 !important;
+    border-width: 2px !important;
+}
+</style>
+{% endblock %}

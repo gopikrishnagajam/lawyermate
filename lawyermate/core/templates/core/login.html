@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5 mx-auto">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3>Welcome Back</h3>
+                <p class="mb-0">Sign in to your account</p>
+            </div>
+            <div class="card-body">
+                <!-- Login Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="username" 
+                               name="username" 
+                               required 
+                               placeholder="Enter your username"
+                               autocomplete="username">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" 
+                               class="form-control form-control-lg" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               placeholder="Enter your password"
+                               autocomplete="current-password">
+                    </div>
+
+                    <!-- Remember Me Checkbox (for future enhancement) -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Remember me
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Additional Links -->
+                <div class="text-center mt-3">
+                    <a href="#" class="text-muted text-decoration-none small">Forgot your password?</a>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Don't have an account? 
+                    <a href="{% url 'signup' %}" class="text-decoration-none">Sign up now</a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Demo Account Info (for development/testing) -->
+        <div class="card mt-3 border-info">
+            <div class="card-body text-center">
+                <h6 class="text-info">📝 Demo Account</h6>
+                <p class="small mb-2">For testing purposes, you can create a new account or use existing credentials.</p>
+                <p class="small text-muted mb-0">All data is stored securely with Django's built-in authentication.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
