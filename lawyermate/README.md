@@ -49,7 +49,7 @@ python manage.py runserver
 
 ####  API Endpoints:
 
-**JWT Token APIs:**
+**JWT Token APIs:** sd
 - POST `/api/jwt/signup/` - Register with JWT tokens
 - POST `/api/jwt/login/` - Login and get JWT tokens  
 - GET `/api/jwt/profile/` - Get profile (requires Bearer token)
