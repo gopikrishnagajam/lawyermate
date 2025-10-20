@@ -31,15 +31,61 @@
                         <h5 class="mb-3">📋 Basic Information</h5>
                         
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="case_number" class="form-label">Case Number <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="case_number" name="case_number" required 
                                        placeholder="e.g., CS 123/2024">
                                 <small class="form-text text-muted">Official court case number</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label for="cnr_number" class="form-label">CNR Number</label>
+                                <input type="text" class="form-control" id="cnr_number" name="cnr_number" 
+                                       placeholder="e.g., DLCT01-234567-2024">
+                                <small class="form-text text-muted">Case Number Registry (16-digit)</small>
+                            </div>
+                            <div class="col-md-4">
                                 <label for="filing_date" class="form-label">Filing Date <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="filing_date" name="filing_date" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="advocate_enrollment" class="form-label">Advocate Enrollment No. <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="advocate_enrollment" name="advocate_enrollment" required 
+                                       placeholder="e.g., D/1234/2020">
+                                <small class="form-text text-muted">Your Bar Council enrollment number</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="case_category" class="form-label">Case Category <span class="text-danger">*</span></label>
+                                <select class="form-select" id="case_category" name="case_category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="ORIGINAL_SUIT">Original Suit</option>
+                                    <option value="REGULAR_SUIT">Regular Suit</option>
+                                    <option value="SUMMARY_SUIT">Summary Suit</option>
+                                    <option value="EXECUTION_PETITION">Execution Petition</option>
+                                    <option value="APPEAL">Appeal</option>
+                                    <option value="REVISION">Revision</option>
+                                    <option value="WRIT_PETITION">Writ Petition</option>
+                                    <option value="CRIMINAL_CASE">Criminal Case</option>
+                                    <option value="BAIL_APPLICATION">Bail Application</option>
+                                    <option value="QUASH_PETITION">Quash Petition</option>
+                                    <option value="ANTICIPATORY_BAIL">Anticipatory Bail</option>
+                                    <option value="MATRIMONIAL">Matrimonial Dispute</option>
+                                    <option value="MAINTENANCE">Maintenance</option>
+                                    <option value="CONSUMER_CASE">Consumer Case</option>
+                                    <option value="CHEQUE_BOUNCE">Cheque Bounce (Sec 138)</option>
+                                    <option value="ARBITRATION">Arbitration</option>
+                                    <option value="COMPANY_PETITION">Company Petition</option>
+                                    <option value="TAX_MATTER">Tax Matter</option>
+                                    <option value="LABOUR_DISPUTE">Labour Dispute</option>
+                                    <option value="PROPERTY_DISPUTE">Property Dispute</option>
+                                    <option value="RECOVERY_SUIT">Recovery Suit</option>
+                                    <option value="INJUNCTION">Injunction</option>
+                                    <option value="DEFAMATION">Defamation</option>
+                                    <option value="MOTOR_ACCIDENT">Motor Accident Claim</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
                             </div>
                         </div>
 
@@ -50,8 +96,181 @@
                             <small class="form-text text-muted">A short, descriptive title for the case</small>
                         </div>
 
+                        <!-- Parties Information -->
+                        <h6 class="mb-3 text-primary">👥 Parties Information</h6>
                         <div class="row mb-3">
                             <div class="col-md-6">
+                                <label for="petitioner_appellant" class="form-label">Petitioner/Appellant <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="petitioner_appellant" name="petitioner_appellant" required 
+                                       placeholder="Name of petitioner/appellant">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="respondent_defendant" class="form-label">Respondent/Defendant <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="respondent_defendant" name="respondent_defendant" required 
+                                       placeholder="Name of respondent/defendant">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="opposing_counsel" class="form-label">Opposing Counsel</label>
+                                <input type="text" class="form-control" id="opposing_counsel" name="opposing_counsel" 
+                                       placeholder="Name of opposing advocate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="party_in_person" class="form-label">Party in Person</label>
+                                <select class="form-select" id="party_in_person" name="party_in_person">
+                                    <option value="NO">No</option>
+                                    <option value="YES">Yes</option>
+                                </select>
+                                <small class="form-text text-muted">Is opposing party representing themselves?</small>
+                            </div>
+                        </div>
+
+                        <!-- Legal Framework -->
+                        <h6 class="mb-3 text-primary">⚖️ Legal Framework</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="main_acts" class="form-label">Main Acts/Laws <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="main_acts" name="main_acts" required 
+                                       placeholder="e.g., CPC, CrPC, IPC, Contract Act">
+                                <small class="form-text text-muted">Primary laws applicable</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sections" class="form-label">Sections <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="sections" name="sections" required 
+                                       placeholder="e.g., Sec 138 NI Act, Sec 420 IPC">
+                                <small class="form-text text-muted">Specific sections involved</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="jurisdiction" class="form-label">Jurisdiction</label>
+                                <input type="text" class="form-control" id="jurisdiction" name="jurisdiction" 
+                                       placeholder="e.g., Territorial, Subject Matter">
+                                <small class="form-text text-muted">Court's jurisdiction basis</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cause_of_action" class="form-label">Cause of Action</label>
+                                <input type="date" class="form-control" id="cause_of_action" name="cause_of_action">
+                                <small class="form-text text-muted">Date when cause of action arose</small>
+                            </div>
+                        </div>
+
+                        <!-- Additional Case Details -->
+                        <h6 class="mb-3 text-primary">📋 Additional Case Details</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="case_sub_type" class="form-label">Case Sub-Type</label>
+                                <input type="text" class="form-control" id="case_sub_type" name="case_sub_type" 
+                                       placeholder="e.g., Summary Suit, Regular Suit">
+                                <small class="form-text text-muted">Specific sub-category</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filing_number" class="form-label">Filing Number</label>
+                                <input type="text" class="form-control" id="filing_number" name="filing_number" 
+                                       placeholder="Internal filing reference">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="diary_number" class="form-label">Diary Number</label>
+                                <input type="text" class="form-control" id="diary_number" name="diary_number" 
+                                       placeholder="Court diary number">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="previous_case_ref" class="form-label">Previous Case Reference</label>
+                                <input type="text" class="form-control" id="previous_case_ref" name="previous_case_ref" 
+                                       placeholder="Lower court case number (if appeal)">
+                                <small class="form-text text-muted">Reference to lower court case</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="connected_cases" class="form-label">Connected Cases</label>
+                                <input type="text" class="form-control" id="connected_cases" name="connected_cases" 
+                                       placeholder="Related case numbers">
+                                <small class="form-text text-muted">Cases to be heard together</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="urgency_level" class="form-label">Urgency Level</label>
+                                <select class="form-select" id="urgency_level" name="urgency_level">
+                                    <option value="ROUTINE">Routine</option>
+                                    <option value="URGENT">Urgent</option>
+                                    <option value="VERY_URGENT">Very Urgent</option>
+                                    <option value="EXTREMELY_URGENT">Extremely Urgent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="case_nature" class="form-label">Nature of Case</label>
+                                <select class="form-select" id="case_nature" name="case_nature">
+                                    <option value="">Select Nature</option>
+                                    <option value="CONTESTED">Contested</option>
+                                    <option value="UNCONTESTED">Uncontested</option>
+                                    <option value="EX_PARTE">Ex-Parte</option>
+                                    <option value="COMPROMISE">Compromise</option>
+                                    <option value="SETTLEMENT">Settlement</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Criminal Case Specific Fields -->
+                        <div id="criminal_fields" style="display: none;">
+                            <h6 class="mb-3 text-danger">🚔 Criminal Case Details</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="fir_number" class="form-label">FIR Number</label>
+                                    <input type="text" class="form-control" id="fir_number" name="fir_number" 
+                                           placeholder="e.g., 123/2024">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="police_station" class="form-label">Police Station</label>
+                                    <input type="text" class="form-control" id="police_station" name="police_station" 
+                                           placeholder="Name of police station">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="investigation_agency" class="form-label">Investigation Agency</label>
+                                    <select class="form-select" id="investigation_agency" name="investigation_agency">
+                                        <option value="">Select Agency</option>
+                                        <option value="LOCAL_POLICE">Local Police</option>
+                                        <option value="CBI">CBI</option>
+                                        <option value="ED">Enforcement Directorate</option>
+                                        <option value="NCB">Narcotics Control Bureau</option>
+                                        <option value="CID">CID</option>
+                                        <option value="EOW">Economic Offences Wing</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="chargesheet_filed" class="form-label">Chargesheet Status</label>
+                                    <select class="form-select" id="chargesheet_filed" name="chargesheet_filed">
+                                        <option value="NOT_FILED">Not Filed</option>
+                                        <option value="FILED">Filed</option>
+                                        <option value="SUPPLEMENTARY">Supplementary Filed</option>
+                                        <option value="FINAL_REPORT">Final Report Filed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bail_status" class="form-label">Bail Status</label>
+                                    <select class="form-select" id="bail_status" name="bail_status">
+                                        <option value="NOT_REQUIRED">Not Required</option>
+                                        <option value="APPLIED">Applied</option>
+                                        <option value="GRANTED">Granted</option>
+                                        <option value="REJECTED">Rejected</option>
+                                        <option value="CANCELLED">Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
                                 <label for="client" class="form-label">Client <span class="text-danger">*</span></label>
                                 <select class="form-select" id="client" name="client" required>
                                     <option value="">Select Client</option>
@@ -63,7 +282,7 @@
                                     <a href="{% url 'client_create' %}" target="_blank">Create new client</a> if not listed
                                 </small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="court" class="form-label">Court <span class="text-danger">*</span></label>
                                 <select class="form-select" id="court" name="court" required>
                                     <option value="">Select Court</option>
@@ -72,10 +291,15 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="col-md-4">
+                                <label for="judge_name" class="form-label">Judge Name</label>
+                                <input type="text" class="form-control" id="judge_name" name="judge_name" 
+                                       placeholder="Hon'ble Justice/Magistrate name">
+                            </div>
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="case_type" class="form-label">Case Type <span class="text-danger">*</span></label>
                                 <select class="form-select" id="case_type" name="case_type" required>
                                     <option value="">Select Type</option>
@@ -84,7 +308,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select" id="status" name="status">
                                     {% for value, label in status_choices %}
@@ -92,12 +316,28 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="priority" class="form-label">Priority</label>
                                 <select class="form-select" id="priority" name="priority">
                                     {% for value, label in priority_choices %}
                                     <option value="{{ value }}" {% if value == 'MEDIUM' %}selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="stage" class="form-label">Current Stage <span class="text-danger">*</span></label>
+                                <select class="form-select" id="stage" name="stage" required>
+                                    <option value="">Select Stage</option>
+                                    <option value="FILING">Filing</option>
+                                    <option value="ADMISSION">Admission</option>
+                                    <option value="PLEADINGS">Pleadings</option>
+                                    <option value="FRAMING_ISSUES">Framing of Issues</option>
+                                    <option value="EVIDENCE">Evidence</option>
+                                    <option value="ARGUMENTS">Arguments</option>
+                                    <option value="JUDGMENT">Judgment Reserved</option>
+                                    <option value="DISPOSAL">Disposal</option>
+                                    <option value="EXECUTION">Execution</option>
+                                    <option value="APPEAL">Appeal</option>
                                 </select>
                             </div>
                         </div>
@@ -119,7 +359,7 @@
 
                     <!-- Additional Information -->
                     <div class="col-md-4">
-                        <h5 class="mb-3">💰 Financial & Timeline</h5>
+                        <h5 class="mb-3">💰 Financial Details</h5>
                         
                         <div class="mb-3">
                             <label for="case_value" class="form-label">Case Value (₹)</label>
@@ -136,15 +376,145 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="court_fees" class="form-label">Court Fees Paid (₹)</label>
+                            <input type="number" class="form-control" id="court_fees" name="court_fees" step="0.01" 
+                                   placeholder="0.00">
+                            <small class="form-text text-muted">Filing fees, process fees etc.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="stamp_duty" class="form-label">Stamp Duty (₹)</label>
+                            <input type="number" class="form-control" id="stamp_duty" name="stamp_duty" step="0.01" 
+                                   placeholder="0.00">
+                            <small class="form-text text-muted">Stamp duty on documents</small>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">📅 Important Dates</h5>
+
+                        <div class="mb-3">
                             <label for="next_hearing_date" class="form-label">Next Hearing Date</label>
                             <input type="datetime-local" class="form-control" id="next_hearing_date" name="next_hearing_date">
-                            <small class="form-text text-muted">First hearing or next scheduled hearing</small>
+                            <small class="form-text text-muted">Next scheduled hearing</small>
                         </div>
 
                         <div class="mb-3">
                             <label for="limitation_date" class="form-label">Limitation Date</label>
                             <input type="date" class="form-control" id="limitation_date" name="limitation_date">
-                            <small class="form-text text-muted">Limitation period expiry (if applicable)</small>
+                            <small class="form-text text-muted">Limitation period expiry</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="service_date" class="form-label">Service Date</label>
+                            <input type="date" class="form-control" id="service_date" name="service_date">
+                            <small class="form-text text-muted">Date of service of summons/notice</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="appearance_date" class="form-label">First Appearance Date</label>
+                            <input type="date" class="form-control" id="appearance_date" name="appearance_date">
+                            <small class="form-text text-muted">Date of first appearance</small>
+                        </div>
+
+                        <h5 class="mb-3 mt-4">📋 Case Tracking</h5>
+
+                        <div class="mb-3">
+                            <label for="interim_orders" class="form-label">Interim Orders</label>
+                            <textarea class="form-control" id="interim_orders" name="interim_orders" rows="2" 
+                                      placeholder="Any interim orders granted"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="vakalatnama_filed" class="form-label">Vakalatnama Filed</label>
+                            <select class="form-select" id="vakalatnama_filed" name="vakalatnama_filed">
+                                <option value="NO">No</option>
+                                <option value="YES">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="power_of_attorney" class="form-label">Power of Attorney</label>
+                            <select class="form-select" id="power_of_attorney" name="power_of_attorney">
+                                <option value="NOT_REQUIRED">Not Required</option>
+                                <option value="REQUIRED">Required</option>
+                                <option value="FILED">Filed</option>
+                            </select>
+                        </div>
+
+                        <!-- Government/Institutional Case Fields -->
+                        <h5 class="mb-3 mt-4">🏛️ Government/Institutional Details</h5>
+
+                        <div class="mb-3">
+                            <label for="govt_pleader" class="form-label">Government Pleader/Counsel</label>
+                            <input type="text" class="form-control" id="govt_pleader" name="govt_pleader" 
+                                   placeholder="Name of Government Pleader (if govt. is party)">
+                            <small class="form-text text-muted">Applicable when State/Central Govt is a party</small>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="department_ministry" class="form-label">Department/Ministry</label>
+                                <input type="text" class="form-control" id="department_ministry" name="department_ministry" 
+                                       placeholder="e.g., Education Department">
+                                <small class="form-text text-muted">Relevant government department</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="institution_type" class="form-label">Institution Type</label>
+                                <select class="form-select" id="institution_type" name="institution_type">
+                                    <option value="">Select Type</option>
+                                    <option value="EDUCATIONAL">Educational Institution</option>
+                                    <option value="HOSPITAL">Hospital/Medical</option>
+                                    <option value="BANK">Bank/Financial</option>
+                                    <option value="CORPORATE">Corporate Entity</option>
+                                    <option value="NGO">NGO/Trust</option>
+                                    <option value="COOPERATIVE">Cooperative Society</option>
+                                    <option value="INDIVIDUAL">Individual</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="registration_number" class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" id="registration_number" name="registration_number" 
+                                       placeholder="Institution/Company registration number">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="license_number" class="form-label">License/Approval Number</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" 
+                                       placeholder="Professional license/approval number">
+                            </div>
+                        </div>
+
+                        <!-- Relief/Prayer Details -->
+                        <h5 class="mb-3 mt-4">🙏 Relief/Prayer Sought</h5>
+
+                        <div class="mb-3">
+                            <label for="main_prayer" class="form-label">Main Prayer/Relief <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="main_prayer" name="main_prayer" rows="3" required 
+                                      placeholder="Primary relief sought from the court"></textarea>
+                            <small class="form-text text-muted">Main relief/order sought</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="interim_relief" class="form-label">Interim Relief Sought</label>
+                            <textarea class="form-control" id="interim_relief" name="interim_relief" rows="2" 
+                                      placeholder="Temporary relief sought pending final decision"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="monetary_claim" class="form-label">Monetary Claim (₹)</label>
+                                <input type="number" class="form-control" id="monetary_claim" name="monetary_claim" step="0.01" 
+                                       placeholder="0.00">
+                                <small class="form-text text-muted">Amount claimed (if any)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="interest_claimed" class="form-label">Interest Rate (%)</label>
+                                <input type="number" class="form-control" id="interest_claimed" name="interest_claimed" step="0.01" 
+                                       placeholder="0.00">
+                                <small class="form-text text-muted">Interest rate claimed</small>
+                            </div>
                         </div>
 
                         <!-- Indian Legal System Guide -->
@@ -153,22 +523,43 @@
                                 <h6 class="mb-0">⚖️ Indian Legal System Guide</h6>
                             </div>
                             <div class="card-body small">
-                                <h6>Common Case Types:</h6>
+                                <h6>Case Categories:</h6>
                                 <ul class="mb-2">
-                                    <li><strong>Civil:</strong> Property disputes, contracts</li>
-                                    <li><strong>Criminal:</strong> FIR, bail, trial</li>
-                                    <li><strong>Family:</strong> Divorce, custody</li>
-                                    <li><strong>Matrimonial:</strong> 498A, DV Act</li>
-                                    <li><strong>Cheque Bounce:</strong> Sec 138 NI Act</li>
-                                    <li><strong>Consumer:</strong> Consumer Protection Act</li>
+                                    <li><strong>Civil:</strong> OS, RS, Execution, Appeal</li>
+                                    <li><strong>Criminal:</strong> Sessions, Magistrate, Bail</li>
+                                    <li><strong>Writ:</strong> Mandamus, Certiorari, Prohibition</li>
+                                    <li><strong>Matrimonial:</strong> Divorce, Maintenance, DV</li>
+                                    <li><strong>Commercial:</strong> Arbitration, Company Law</li>
+                                    <li><strong>Consumer:</strong> District/State/National Forum</li>
                                 </ul>
                                 
+                                <h6>Common Acts & Sections:</h6>
+                                <ul class="mb-2">
+                                    <li><strong>CPC:</strong> Order 6, 7, 8, 9, 39</li>
+                                    <li><strong>CrPC:</strong> Sec 154, 161, 313, 482</li>
+                                    <li><strong>IPC:</strong> Sec 420, 498A, 506, 354</li>
+                                    <li><strong>NI Act:</strong> Sec 138 (Cheque Bounce)</li>
+                                    <li><strong>DV Act:</strong> Sec 12, 18, 19, 20</li>
+                                    <li><strong>Contract Act:</strong> Sec 73, 74</li>
+                                </ul>
+
                                 <h6>Court Hierarchy:</h6>
+                                <ul class="mb-2">
+                                    <li><strong>SC:</strong> Final appeals, Art 32, 136</li>
+                                    <li><strong>HC:</strong> Art 226, 227 jurisdiction</li>
+                                    <li><strong>District:</strong> Civil suits above ₹20L</li>
+                                    <li><strong>Sessions:</strong> Criminal trials</li>
+                                    <li><strong>CJM/JMFC:</strong> Magistrate matters</li>
+                                    <li><strong>Family Court:</strong> Matrimonial disputes</li>
+                                </ul>
+
+                                <h6>Important Documents:</h6>
                                 <ul class="mb-0">
-                                    <li><strong>Supreme Court:</strong> Final appeals</li>
-                                    <li><strong>High Court:</strong> State level</li>
-                                    <li><strong>District Court:</strong> Civil & Sessions</li>
-                                    <li><strong>Magistrate:</strong> Criminal matters</li>
+                                    <li>Vakalatnama (Advocate authorization)</li>
+                                    <li>Power of Attorney (if required)</li>
+                                    <li>Court Fee & Stamp Duty</li>
+                                    <li>Process Fee for service</li>
+                                    <li>CNR (Case Number Registry)</li>
                                 </ul>
                             </div>
                         </div>
@@ -205,43 +596,168 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('filing_date').value = today;
     
-    // Auto-generate case title based on client and case type
-    const clientSelect = document.getElementById('client');
+    // Show/hide criminal case specific fields
     const caseTypeSelect = document.getElementById('case_type');
+    const criminalFields = document.getElementById('criminal_fields');
+    
+    function toggleCriminalFields() {
+        const selectedType = caseTypeSelect.value.toLowerCase();
+        if (selectedType.includes('criminal') || selectedType.includes('bail') || selectedType.includes('fir')) {
+            criminalFields.style.display = 'block';
+        } else {
+            criminalFields.style.display = 'none';
+        }
+    }
+    
+    caseTypeSelect.addEventListener('change', toggleCriminalFields);
+    
+    // Show/hide criminal fields based on case category
+    const caseCategorySelect = document.getElementById('case_category');
+    
+    function toggleCriminalFieldsByCategory() {
+        const selectedCategory = caseCategorySelect.value;
+        const criminalCategories = ['CRIMINAL_CASE', 'BAIL_APPLICATION', 'QUASH_PETITION', 'ANTICIPATORY_BAIL'];
+        
+        if (criminalCategories.includes(selectedCategory)) {
+            criminalFields.style.display = 'block';
+        } else {
+            criminalFields.style.display = 'none';
+        }
+    }
+    
+    caseCategorySelect.addEventListener('change', toggleCriminalFieldsByCategory);
+    
+    // Auto-generate case title based on parties and case category
+    const clientSelect = document.getElementById('client');
+    const petitionerInput = document.getElementById('petitioner_appellant');
+    const respondentInput = document.getElementById('respondent_defendant');
     const caseTitleInput = document.getElementById('case_title');
     
     function updateCaseTitle() {
         const clientText = clientSelect.selectedOptions[0]?.text || '';
-        const caseTypeText = caseTypeSelect.selectedOptions[0]?.text || '';
+        const categoryText = caseCategorySelect.selectedOptions[0]?.text || '';
+        const petitioner = petitionerInput.value || clientText;
+        const respondent = respondentInput.value;
         
-        if (clientText && caseTypeText && !caseTitleInput.value) {
-            caseTitleInput.value = `${clientText} vs. - ${caseTypeText}`;
+        if (petitioner && respondent && categoryText && !caseTitleInput.value) {
+            caseTitleInput.value = `${petitioner} vs. ${respondent} - ${categoryText}`;
         }
     }
     
     clientSelect.addEventListener('change', updateCaseTitle);
-    caseTypeSelect.addEventListener('change', updateCaseTitle);
+    caseCategorySelect.addEventListener('change', updateCaseTitle);
+    petitionerInput.addEventListener('blur', updateCaseTitle);
+    respondentInput.addEventListener('blur', updateCaseTitle);
+    
+    // Sync client with petitioner
+    clientSelect.addEventListener('change', function() {
+        if (this.selectedOptions[0] && !petitionerInput.value) {
+            petitionerInput.value = this.selectedOptions[0].text;
+        }
+    });
     
     // Form validation
     document.getElementById('caseCreateForm').addEventListener('submit', function(e) {
-        const requiredFields = ['case_number', 'case_title', 'client', 'court', 'case_type', 'description'];
+        const requiredFields = [
+            'case_number', 'case_title', 'client', 'court', 'case_type', 'description',
+            'advocate_enrollment', 'case_category', 'petitioner_appellant', 'respondent_defendant',
+            'main_acts', 'sections', 'stage', 'main_prayer'
+        ];
+        
         let isValid = true;
+        let firstInvalidField = null;
+        
+        // Clear previous validation states
+        document.querySelectorAll('.is-invalid').forEach(field => {
+            field.classList.remove('is-invalid');
+        });
         
         requiredFields.forEach(fieldName => {
             const field = document.getElementById(fieldName);
-            if (!field.value.trim()) {
+            if (field && !field.value.trim()) {
+                field.classList.add('is-invalid');
+                if (!firstInvalidField) {
+                    firstInvalidField = field;
+                }
+                isValid = false;
+            }
+        });
+        
+        // Validate CNR number format if provided
+        const cnrField = document.getElementById('cnr_number');
+        if (cnrField.value && !/^[A-Z]{4}\d{2}-\d{6}-\d{4}$/.test(cnrField.value)) {
+            cnrField.classList.add('is-invalid');
+            isValid = false;
+            if (!firstInvalidField) {
+                firstInvalidField = cnrField;
+            }
+        }
+        
+        // Validate advocate enrollment number format
+        const enrollmentField = document.getElementById('advocate_enrollment');
+        if (enrollmentField.value && !/^[A-Z]\/\d+\/\d{4}$/.test(enrollmentField.value)) {
+            enrollmentField.classList.add('is-invalid');
+            isValid = false;
+            if (!firstInvalidField) {
+                firstInvalidField = enrollmentField;
+            }
+        }
+        
+        // Validate monetary fields are not negative
+        const monetaryFields = ['case_value', 'fees_charged', 'court_fees', 'stamp_duty', 'monetary_claim'];
+        monetaryFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (field && field.value && parseFloat(field.value) < 0) {
                 field.classList.add('is-invalid');
                 isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
+                if (!firstInvalidField) {
+                    firstInvalidField = field;
+                }
             }
         });
         
         if (!isValid) {
             e.preventDefault();
-            alert('Please fill in all required fields.');
+            if (firstInvalidField) {
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidField.focus();
+            }
+            
+            // Show specific error messages
+            let errorMessage = 'Please fix the following errors:\n';
+            if (document.querySelectorAll('.is-invalid').length > 0) {
+                errorMessage += '• Fill in all required fields (marked with *)\n';
+            }
+            if (cnrField.classList.contains('is-invalid')) {
+                errorMessage += '• CNR number should be in format: DLCT01-234567-2024\n';
+            }
+            if (enrollmentField.classList.contains('is-invalid')) {
+                errorMessage += '• Enrollment number should be in format: D/1234/2020\n';
+            }
+            if (document.querySelectorAll('input[type="number"].is-invalid').length > 0) {
+                errorMessage += '• Monetary values cannot be negative\n';
+            }
+            
+            alert(errorMessage);
         }
     });
+    
+    // Real-time validation feedback
+    document.getElementById('cnr_number').addEventListener('input', function() {
+        const isValid = !this.value || /^[A-Z]{4}\d{2}-\d{6}-\d{4}$/.test(this.value);
+        this.classList.toggle('is-invalid', !isValid);
+        this.classList.toggle('is-valid', isValid && this.value);
+    });
+    
+    document.getElementById('advocate_enrollment').addEventListener('input', function() {
+        const isValid = !this.value || /^[A-Z]\/\d+\/\d{4}$/.test(this.value);
+        this.classList.toggle('is-invalid', !isValid);
+        this.classList.toggle('is-valid', isValid && this.value);
+    });
+    
+    // Initialize criminal fields visibility
+    toggleCriminalFields();
+    toggleCriminalFieldsByCategory();
 });
 </script>
 
@@ -263,8 +779,98 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: #dc3545;
 }
 
+.is-valid {
+    border-color: #28a745;
+}
+
 .bg-light {
     background-color: #f8f9fa !important;
+}
+
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+#criminal_fields {
+    background-color: #fff5f5;
+    border: 1px solid #fed7d7;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+#criminal_fields h6 {
+    color: #c53030;
+    border-bottom: 1px solid #fed7d7;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.section-header {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-3, .col-md-4, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    #criminal_fields {
+        margin: 0.5rem 0;
+        padding: 0.75rem;
+    }
+}
+
+/* Indian Legal System Guide styling */
+.card-header {
+    font-weight: 600;
+}
+
+.card-body ul {
+    padding-left: 1rem;
+}
+
+.card-body li {
+    margin-bottom: 0.25rem;
+}
+
+/* Form section styling */
+.row + .row {
+    margin-top: 0;
+}
+
+/* Validation feedback */
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+
+.valid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #198754;
 }
 </style>
 {% endblock %}
