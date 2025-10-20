@@ -1,0 +1,242 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Schedule Hearing - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'diary_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'hearing_list' %}">Hearings</a></li>
+            <li class="breadcrumb-item active">Schedule Hearing</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2><i class="fas fa-calendar-plus text-primary"></i> Schedule New Hearing</h2>
+        <p class="text-muted">Schedule a court hearing for your case</p>
+    </div>
+
+    <!-- Main Form Card -->
+    <form method="post" action="{% url 'hearing_create' %}" id="hearingForm">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Left Column - Main Information -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Hearing Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Case Selection -->
+                            <div class="col-md-12 mb-3">
+                                <label for="case" class="form-label">
+                                    <i class="fas fa-folder text-primary"></i> Case <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="case" name="case" required>
+                                    <option value="">Select a case...</option>
+                                    {% for case in user_cases %}
+                                    <option value="{{ case.id }}">
+                                        {{ case.case_number }} - {{ case.case_title|truncatechars:50 }} ({{ case.client.name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Select the case for which hearing is scheduled</div>
+                            </div>
+
+                            <!-- Hearing Date and Time -->
+                            <div class="col-md-6 mb-3">
+                                <label for="hearing_date" class="form-label">
+                                    <i class="fas fa-calendar text-primary"></i> Hearing Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="hearing_date" name="hearing_date" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="hearing_time" class="form-label">
+                                    <i class="fas fa-clock text-primary"></i> Hearing Time <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" class="form-control" id="hearing_time" name="hearing_time" required>
+                            </div>
+
+                            <!-- Hearing Type -->
+                            <div class="col-md-6 mb-3">
+                                <label for="hearing_type" class="form-label">
+                                    <i class="fas fa-gavel text-primary"></i> Hearing Type <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="hearing_type" name="hearing_type" required>
+                                    <option value="">Select hearing type...</option>
+                                    <option value="FIRST_HEARING">First Hearing</option>
+                                    <option value="ARGUMENTS">Arguments</option>
+                                    <option value="EVIDENCE">Evidence Recording</option>
+                                    <option value="CROSS_EXAMINATION">Cross Examination</option>
+                                    <option value="FINAL_ARGUMENTS">Final Arguments</option>
+                                    <option value="JUDGMENT">Judgment</option>
+                                    <option value="MENTION">Mention</option>
+                                    <option value="INTERIM_APPLICATION">Interim Application</option>
+                                    <option value="BAIL_HEARING">Bail Hearing</option>
+                                    <option value="STATUS_CONFERENCE">Status Conference</option>
+                                </select>
+                            </div>
+
+                            <!-- Court Room -->
+                            <div class="col-md-6 mb-3">
+                                <label for="court_room" class="form-label">
+                                    <i class="fas fa-door-open text-primary"></i> Court Room
+                                </label>
+                                <input type="text" class="form-control" id="court_room" name="court_room" placeholder="e.g., Court Room 5">
+                            </div>
+
+                            <!-- Judge Name -->
+                            <div class="col-md-12 mb-3">
+                                <label for="judge_name" class="form-label">
+                                    <i class="fas fa-user-tie text-primary"></i> Judge Name
+                                </label>
+                                <input type="text" class="form-control" id="judge_name" name="judge_name" placeholder="Honorable Judge Name">
+                            </div>
+
+                            <!-- Purpose -->
+                            <div class="col-md-12 mb-3">
+                                <label for="purpose" class="form-label">
+                                    <i class="fas fa-info-circle text-primary"></i> Purpose <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="purpose" name="purpose" rows="4" required placeholder="Describe the purpose of this hearing..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Details Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list"></i> Additional Details (Optional)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Preparation Notes -->
+                            <div class="col-md-12 mb-3">
+                                <label for="preparation_notes" class="form-label">
+                                    <i class="fas fa-clipboard-list text-info"></i> Preparation Notes
+                                </label>
+                                <textarea class="form-control" id="preparation_notes" name="preparation_notes" rows="3" placeholder="Notes on how to prepare for this hearing..."></textarea>
+                            </div>
+
+                            <!-- Documents Required -->
+                            <div class="col-md-12 mb-3">
+                                <label for="documents_required" class="form-label">
+                                    <i class="fas fa-file-alt text-info"></i> Documents Required
+                                </label>
+                                <textarea class="form-control" id="documents_required" name="documents_required" rows="3" placeholder="List documents needed for this hearing..."></textarea>
+                            </div>
+
+                            <!-- Witnesses Required -->
+                            <div class="col-md-12 mb-3">
+                                <label for="witnesses_required" class="form-label">
+                                    <i class="fas fa-users text-info"></i> Witnesses Required
+                                </label>
+                                <textarea class="form-control" id="witnesses_required" name="witnesses_required" rows="3" placeholder="List witnesses that need to be present..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Information -->
+            <div class="col-md-4">
+                <!-- Hearing Types Guide -->
+                <div class="card mb-4 bg-info bg-opacity-10">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> Hearing Types Guide</h6>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><strong>First Hearing:</strong> Initial appearance before the court</li>
+                                <li class="mb-2"><strong>Arguments:</strong> Presentation of legal arguments</li>
+                                <li class="mb-2"><strong>Evidence:</strong> Recording of evidence and documents</li>
+                                <li class="mb-2"><strong>Cross Examination:</strong> Cross-examination of witnesses</li>
+                                <li class="mb-2"><strong>Final Arguments:</strong> Concluding arguments before judgment</li>
+                                <li class="mb-2"><strong>Judgment:</strong> Pronouncement of court's decision</li>
+                                <li class="mb-2"><strong>Mention:</strong> Brief appearance for updates</li>
+                                <li class="mb-2"><strong>Interim Application:</strong> Application for interim relief</li>
+                                <li class="mb-2"><strong>Bail Hearing:</strong> Hearing for bail application</li>
+                                <li><strong>Status Conference:</strong> Case management conference</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Preparation Checklist -->
+                <div class="card mb-4 bg-warning bg-opacity-10">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="fas fa-check-circle"></i> Preparation Checklist</h6>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ul class="mb-0">
+                                <li>Review case files and facts</li>
+                                <li>Prepare legal arguments</li>
+                                <li>Organize evidence and documents</li>
+                                <li>Brief witnesses if required</li>
+                                <li>Note relevant case laws</li>
+                                <li>Confirm court room and timing</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'hearing_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Schedule Hearing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+.form-label {
+    font-weight: 600;
+}
+
+.form-text {
+    font-size: 0.875rem;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+</style>
+
+<script>
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('hearing_date').setAttribute('min', today);
+});
+</script>
+{% endblock %}

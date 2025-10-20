@@ -35,7 +35,8 @@ urlpatterns = [
     
     # Electronic Diary URLs for Indian Lawyers
     path("diary/", views.diary_dashboard, name="diary_dashboard"),
-    
+    path("diary/calendar-events/", views.calendar_events, name="calendar_events"),
+
     # Case Management
     path("diary/cases/", views.case_list, name="case_list"),
     path("diary/cases/create/", views.case_create, name="case_create"),
@@ -47,11 +48,13 @@ urlpatterns = [
     
     # Hearing Management
     path("diary/hearings/", views.hearing_list, name="hearing_list"),
-    
+    path("diary/hearings/create/", views.hearing_create, name="hearing_create"),
+
     # Task Management
     path("diary/tasks/", views.task_list, name="task_list"),
+    path("diary/tasks/create/", views.task_create, name="task_create"),
     path("diary/tasks/<int:task_id>/complete/", views.task_complete, name="task_complete"),
-    
+
     # Court Directory
     path("diary/courts/", views.court_list, name="court_list"),
 ]
