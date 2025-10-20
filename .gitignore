@@ -1,1 +1,3 @@
-/.venv
+Lawyermate/venv/
+Lawyermate/README.md
+*__pycache__/
