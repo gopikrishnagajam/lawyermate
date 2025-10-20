@@ -10,9 +10,9 @@
             <h2>📋 Tasks & Reminders</h2>
             <p class="text-muted mb-0">Manage your legal tasks and deadlines</p>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+        <a href="{% url 'task_create' %}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Task
-        </button>
+        </a>
     </div>
 
     <!-- Filters & Stats -->
@@ -244,9 +244,9 @@
                         <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
                         <h5>No tasks created</h5>
                         <p class="text-muted">You haven't created any tasks or reminders yet.</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        <a href="{% url 'task_create' %}" class="btn btn-primary">
                             Create Your First Task
-                        </button>
+                        </a>
                     {% endif %}
                 </div>
             </div>

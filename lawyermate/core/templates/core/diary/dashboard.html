@@ -86,6 +86,42 @@
         </div>
     </div>
 
+    <!-- Calendar View -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Calendar View - Hearings & Tasks</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-light" onclick="calendar.changeView('dayGridMonth')">Month</button>
+                        <button type="button" class="btn btn-light" onclick="calendar.changeView('timeGridWeek')">Week</button>
+                        <button type="button" class="btn btn-light" onclick="calendar.changeView('timeGridDay')">Day</button>
+                        <button type="button" class="btn btn-light" onclick="calendar.changeView('listWeek')">Agenda</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <span class="badge bg-primary">◉</span> Hearings
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-danger">◉</span> Urgent Tasks
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-warning">◉</span> High Priority Tasks
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-info">◉</span> Normal Tasks
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Today's Hearings -->
         <div class="col-md-6">
@@ -309,7 +345,109 @@
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+<style>
+#calendar {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    opacity: 0.8;
+}
+</style>
+
 <script>
+let calendar;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        height: 'auto',
+        events: function(info, successCallback, failureCallback) {
+            fetch('/diary/calendar-events/')
+                .then(response => response.json())
+                .then(data => {
+                    successCallback(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching calendar events:', error);
+                    failureCallback(error);
+                });
+        },
+        eventClick: function(info) {
+            const event = info.event;
+            const eventType = event.extendedProps.type;
+
+            if (eventType === 'hearing') {
+                window.location.href = `/diary/cases/${event.extendedProps.case_id}/`;
+            } else if (eventType === 'task') {
+                window.location.href = '/diary/tasks/';
+            }
+        },
+        eventMouseEnter: function(info) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'fc-event-tooltip';
+            tooltip.style.cssText = 'position: absolute; z-index: 10000; background: #333; color: white; padding: 10px; border-radius: 5px; font-size: 12px; max-width: 300px;';
+
+            const event = info.event;
+            let content = `<strong>${event.title}</strong><br>`;
+
+            if (event.extendedProps.description) {
+                content += `${event.extendedProps.description}<br>`;
+            }
+
+            if (event.extendedProps.case_number) {
+                content += `Case: ${event.extendedProps.case_number}<br>`;
+            }
+
+            if (event.extendedProps.priority) {
+                content += `Priority: ${event.extendedProps.priority}<br>`;
+            }
+
+            content += `Time: ${event.start.toLocaleString()}`;
+
+            tooltip.innerHTML = content;
+            document.body.appendChild(tooltip);
+
+            const rect = info.el.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.bottom + 5) + 'px';
+
+            info.el.tooltip = tooltip;
+        },
+        eventMouseLeave: function(info) {
+            if (info.el.tooltip) {
+                info.el.tooltip.remove();
+                info.el.tooltip = null;
+            }
+        },
+        dayMaxEvents: 3,
+        moreLinkClick: 'popover',
+        navLinks: true,
+        editable: false,
+        selectable: true
+    });
+
+    calendar.render();
+});
+
 function markCompleted(taskId) {
     fetch(`/diary/tasks/${taskId}/complete/`, {
         method: 'POST',
@@ -330,6 +468,15 @@ function markCompleted(taskId) {
         console.error('Error:', error);
         alert('Error marking task as completed');
     });
+}
+
+// Add CSRF token to page if not present
+if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = '{{ csrf_token }}';
+    document.body.appendChild(csrfInput);
 }
 </script>
 {% endblock %}

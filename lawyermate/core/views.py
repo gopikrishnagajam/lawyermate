@@ -174,6 +174,78 @@ def diary_dashboard(request):
 
 
 @login_required
+def calendar_events(request):
+    """
+    API endpoint to fetch calendar events (hearings and tasks) in FullCalendar format
+    """
+    user = request.user
+    events = []
+
+    # Fetch all hearings for the user
+    hearings = Hearing.objects.filter(case__lawyer=user).select_related('case', 'case__client')
+
+    for hearing in hearings:
+        # Color code based on status
+        if hearing.status == 'SCHEDULED':
+            color = '#0d6efd'  # Primary blue
+        elif hearing.status == 'COMPLETED':
+            color = '#198754'  # Success green
+        elif hearing.status == 'ADJOURNED':
+            color = '#ffc107'  # Warning yellow
+        else:
+            color = '#6c757d'  # Secondary gray
+
+        events.append({
+            'id': f'hearing-{hearing.id}',
+            'title': f'📅 {hearing.case.case_number}',
+            'start': hearing.hearing_date.isoformat(),
+            'color': color,
+            'extendedProps': {
+                'type': 'hearing',
+                'case_id': hearing.case.id,
+                'case_number': hearing.case.case_number,
+                'description': f'{hearing.get_hearing_type_display()} - {hearing.case.client.name}',
+                'court_room': hearing.court_room if hearing.court_room else 'Not specified',
+                'judge_name': hearing.judge_name if hearing.judge_name else 'Not specified',
+            }
+        })
+
+    # Fetch all incomplete tasks for the user
+    tasks = TaskReminder.objects.filter(lawyer=user, is_completed=False).select_related('case')
+
+    for task in tasks:
+        # Color code based on priority
+        if task.priority == 'URGENT':
+            color = '#dc3545'  # Danger red
+        elif task.priority == 'HIGH':
+            color = '#ffc107'  # Warning yellow
+        elif task.priority == 'MEDIUM':
+            color = '#0dcaf0'  # Info cyan
+        else:
+            color = '#6c757d'  # Secondary gray
+
+        title = f'📋 {task.title}'
+        if task.case:
+            title = f'📋 {task.case.case_number} - {task.title}'
+
+        events.append({
+            'id': f'task-{task.id}',
+            'title': title,
+            'start': task.due_date.isoformat(),
+            'color': color,
+            'extendedProps': {
+                'type': 'task',
+                'case_number': task.case.case_number if task.case else None,
+                'description': task.description[:100] + '...' if len(task.description) > 100 else task.description,
+                'priority': task.get_priority_display(),
+                'task_type': task.get_task_type_display(),
+            }
+        })
+
+    return JsonResponse(events, safe=False)
+
+
+@login_required
 def case_list(request):
     """
     List all cases with filtering and search functionality
@@ -395,11 +467,11 @@ def hearing_list(request):
     """
     user = request.user
     hearings_list = Hearing.objects.filter(case__lawyer=user).select_related('case', 'case__client')
-    
+
     # Date filtering
     date_filter = request.GET.get('date_filter', 'upcoming')
     today = timezone.now().date()
-    
+
     if date_filter == 'today':
         hearings_list = hearings_list.filter(hearing_date__date=today)
     elif date_filter == 'tomorrow':
@@ -415,28 +487,97 @@ def hearing_list(request):
         hearings_list = hearings_list.filter(hearing_date__date__gte=today)
     elif date_filter == 'past':
         hearings_list = hearings_list.filter(hearing_date__date__lt=today)
-    
+
     # Status filtering
     status_filter = request.GET.get('status', '')
     if status_filter:
         hearings_list = hearings_list.filter(status=status_filter)
-    
+
     hearings_list = hearings_list.order_by('hearing_date')
-    
+
     # Pagination
     paginator = Paginator(hearings_list, 20)
     page_number = request.GET.get('page')
     hearings = paginator.get_page(page_number)
-    
+
+    # Get user's cases for the modal form
+    user_cases = Case.objects.filter(lawyer=user).select_related('client').order_by('-filing_date')
+
     context = {
         'hearings': hearings,
         'date_filter': date_filter,
         'status_filter': status_filter,
         'status_choices': Hearing.HEARING_STATUS,
         'today': today,
+        'user_cases': user_cases,
     }
-    
+
     return render(request, 'core/diary/hearing_list.html', context)
+
+
+@login_required
+def hearing_create(request):
+    """
+    Create a new hearing
+    """
+    if request.method == 'POST':
+        user = request.user
+
+        # Get form data
+        case_id = request.POST.get('case')
+        hearing_date = request.POST.get('hearing_date')
+        hearing_time = request.POST.get('hearing_time')
+        hearing_type = request.POST.get('hearing_type')
+        court_room = request.POST.get('court_room', '')
+        judge_name = request.POST.get('judge_name', '')
+        purpose = request.POST.get('purpose')
+        preparation_notes = request.POST.get('preparation_notes', '')
+        documents_required = request.POST.get('documents_required', '')
+        witnesses_required = request.POST.get('witnesses_required', '')
+
+        # Validate case ownership
+        try:
+            case = Case.objects.get(id=case_id, lawyer=user)
+        except Case.DoesNotExist:
+            messages.error(request, 'Invalid case selected.')
+            return redirect('hearing_list')
+
+        # Combine date and time
+        from datetime import datetime
+        hearing_datetime_str = f"{hearing_date} {hearing_time}"
+        hearing_datetime = timezone.make_aware(
+            datetime.strptime(hearing_datetime_str, '%Y-%m-%d %H:%M')
+        )
+
+        # Create the hearing
+        try:
+            hearing = Hearing.objects.create(
+                case=case,
+                hearing_date=hearing_datetime,
+                hearing_type=hearing_type,
+                court_room=court_room,
+                judge_name=judge_name,
+                purpose=purpose,
+                preparation_notes=preparation_notes,
+                documents_required=documents_required,
+                witnesses_required=witnesses_required,
+                status='SCHEDULED'
+            )
+            messages.success(request, f'Hearing scheduled successfully for {hearing_datetime.strftime("%d %b %Y at %H:%M")}!')
+        except Exception as e:
+            messages.error(request, f'Error creating hearing: {str(e)}')
+
+        return redirect('hearing_list')
+
+    # GET request - show the form
+    user = request.user
+    user_cases = Case.objects.filter(lawyer=user).select_related('client').order_by('-filing_date')
+
+    context = {
+        'user_cases': user_cases,
+    }
+
+    return render(request, 'core/diary/hearing_create.html', context)
 
 
 @login_required
@@ -465,19 +606,23 @@ def task_list(request):
         tasks_list = tasks_list.filter(priority=priority_filter)
     
     tasks_list = tasks_list.order_by('due_date')
-    
+
     # Pagination
     paginator = Paginator(tasks_list, 20)
     page_number = request.GET.get('page')
     tasks = paginator.get_page(page_number)
-    
+
+    # Get user's cases for the modal form
+    user_cases = Case.objects.filter(lawyer=user).select_related('client').order_by('-filing_date')
+
     context = {
         'tasks': tasks,
         'status_filter': status_filter,
         'priority_filter': priority_filter,
         'priority_choices': TaskReminder.PRIORITY_LEVELS,
+        'user_cases': user_cases,
     }
-    
+
     return render(request, 'core/diary/task_list.html', context)
 
 
@@ -489,11 +634,84 @@ def task_complete(request, task_id):
     """
     task = get_object_or_404(TaskReminder, id=task_id, lawyer=request.user)
     task.mark_completed()
-    
+
     return JsonResponse({
         'success': True,
         'message': f'Task "{task.title}" marked as completed!'
     })
+
+
+@login_required
+def task_create(request):
+    """
+    Create a new task/reminder
+    """
+    if request.method == 'POST':
+        user = request.user
+
+        # Get form data
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        task_type = request.POST.get('task_type')
+        priority = request.POST.get('priority')
+        due_date = request.POST.get('due_date')
+        due_time = request.POST.get('due_time')
+        reminder_date = request.POST.get('reminder_date')
+        reminder_time = request.POST.get('reminder_time')
+        case_id = request.POST.get('case')
+
+        # Combine due date and time
+        from datetime import datetime
+        due_datetime_str = f"{due_date} {due_time}"
+        due_datetime = timezone.make_aware(
+            datetime.strptime(due_datetime_str, '%Y-%m-%d %H:%M')
+        )
+
+        # Handle optional reminder datetime
+        reminder_datetime = None
+        if reminder_date and reminder_time:
+            reminder_datetime_str = f"{reminder_date} {reminder_time}"
+            reminder_datetime = timezone.make_aware(
+                datetime.strptime(reminder_datetime_str, '%Y-%m-%d %H:%M')
+            )
+
+        # Handle optional case link
+        case = None
+        if case_id:
+            try:
+                case = Case.objects.get(id=case_id, lawyer=user)
+            except Case.DoesNotExist:
+                pass
+
+        # Create the task
+        try:
+            task = TaskReminder.objects.create(
+                lawyer=user,
+                case=case,
+                title=title,
+                description=description,
+                task_type=task_type,
+                priority=priority,
+                due_date=due_datetime,
+                reminder_date=reminder_datetime,
+                is_completed=False,
+                is_overdue=False
+            )
+            messages.success(request, f'Task "{title}" created successfully! Due: {due_datetime.strftime("%d %b %Y at %H:%M")}')
+        except Exception as e:
+            messages.error(request, f'Error creating task: {str(e)}')
+
+        return redirect('task_list')
+
+    # GET request - show the form
+    user = request.user
+    user_cases = Case.objects.filter(lawyer=user).select_related('client').order_by('-filing_date')
+
+    context = {
+        'user_cases': user_cases,
+    }
+
+    return render(request, 'core/diary/task_create.html', context)
 
 
 @login_required

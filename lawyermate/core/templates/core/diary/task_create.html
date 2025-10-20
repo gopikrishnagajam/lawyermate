@@ -1,0 +1,279 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Create Task - LawyerMate{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'diary_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'task_list' %}">Tasks</a></li>
+            <li class="breadcrumb-item active">Create Task</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="mb-4">
+        <h2><i class="fas fa-plus-circle text-primary"></i> Create New Task</h2>
+        <p class="text-muted">Add a new task or reminder to your schedule</p>
+    </div>
+
+    <!-- Main Form Card -->
+    <form method="post" action="{% url 'task_create' %}" id="taskForm">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Left Column - Main Information -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Task Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Title -->
+                            <div class="col-md-12 mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading text-primary"></i> Task Title <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title" required placeholder="Enter task title...">
+                                <div class="form-text">A short, descriptive title for the task</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-12 mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left text-primary"></i> Description <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Describe the task details..."></textarea>
+                            </div>
+
+                            <!-- Task Type and Priority -->
+                            <div class="col-md-6 mb-3">
+                                <label for="task_type" class="form-label">
+                                    <i class="fas fa-tag text-primary"></i> Task Type <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="task_type" name="task_type" required>
+                                    <option value="">Select task type...</option>
+                                    <option value="HEARING_PREP">Hearing Preparation</option>
+                                    <option value="DOCUMENT_FILING">Document Filing</option>
+                                    <option value="LIMITATION">Limitation Deadline</option>
+                                    <option value="CLIENT_MEETING">Client Meeting</option>
+                                    <option value="COURT_FEE">Court Fee Payment</option>
+                                    <option value="APPEAL_DEADLINE">Appeal Deadline</option>
+                                    <option value="COMPLIANCE">Compliance Matter</option>
+                                    <option value="FOLLOW_UP">Follow Up</option>
+                                    <option value="OTHER">Other Task</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="priority" class="form-label">
+                                    <i class="fas fa-exclamation-circle text-primary"></i> Priority <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="priority" name="priority" required>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="URGENT">Urgent</option>
+                                </select>
+                            </div>
+
+                            <!-- Due Date and Time -->
+                            <div class="col-md-6 mb-3">
+                                <label for="due_date" class="form-label">
+                                    <i class="fas fa-calendar text-primary"></i> Due Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="due_date" name="due_date" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="due_time" class="form-label">
+                                    <i class="fas fa-clock text-primary"></i> Due Time <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" class="form-control" id="due_time" name="due_time" required>
+                            </div>
+
+                            <!-- Link to Case (Optional) -->
+                            <div class="col-md-12 mb-3">
+                                <label for="case" class="form-label">
+                                    <i class="fas fa-briefcase text-primary"></i> Link to Case (Optional)
+                                </label>
+                                <select class="form-select" id="case" name="case">
+                                    <option value="">No case selected</option>
+                                    {% for case in user_cases %}
+                                    <option value="{{ case.id }}">
+                                        {{ case.case_number }} - {{ case.case_title|truncatechars:50 }} ({{ case.client.name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Optionally link this task to a specific case</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reminder Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enableReminder" onchange="toggleReminder()">
+                            <label class="form-check-label" for="enableReminder">
+                                <h5 class="mb-0 d-inline"><i class="fas fa-bell text-info"></i> Set Reminder (Optional)</h5>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body" id="reminderFields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="reminder_date" class="form-label">
+                                    <i class="fas fa-calendar-alt text-info"></i> Reminder Date
+                                </label>
+                                <input type="date" class="form-control" id="reminder_date" name="reminder_date">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="reminder_time" class="form-label">
+                                    <i class="fas fa-clock text-info"></i> Reminder Time
+                                </label>
+                                <input type="time" class="form-control" id="reminder_time" name="reminder_time">
+                            </div>
+                        </div>
+                        <div class="alert alert-info mb-0">
+                            <small><i class="fas fa-info-circle"></i> Set a reminder date/time before the due date to get notified</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Information -->
+            <div class="col-md-4">
+                <!-- Task Types Guide -->
+                <div class="card mb-4 bg-info bg-opacity-10">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-info-circle"></i> Task Types</h6>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><strong>Hearing Preparation:</strong> Prepare documents and arguments for upcoming hearing</li>
+                                <li class="mb-2"><strong>Document Filing:</strong> File legal documents with court or authorities</li>
+                                <li class="mb-2"><strong>Limitation Deadline:</strong> Critical deadline to file or respond</li>
+                                <li class="mb-2"><strong>Client Meeting:</strong> Schedule meeting with client</li>
+                                <li class="mb-2"><strong>Court Fee Payment:</strong> Pay court fees or stamps</li>
+                                <li class="mb-2"><strong>Appeal Deadline:</strong> Deadline to file appeal</li>
+                                <li class="mb-2"><strong>Compliance:</strong> Comply with court orders</li>
+                                <li class="mb-2"><strong>Follow Up:</strong> Follow up on pending matters</li>
+                                <li><strong>Other Task:</strong> Any other legal task</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Priority Guide -->
+                <div class="card mb-4 bg-warning bg-opacity-10">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Priority Levels</h6>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><span class="badge bg-danger">Urgent</span> - Critical, must be done immediately</li>
+                                <li class="mb-2"><span class="badge bg-warning text-dark">High</span> - Important, do soon</li>
+                                <li class="mb-2"><span class="badge bg-info">Medium</span> - Normal priority</li>
+                                <li><span class="badge bg-secondary">Low</span> - Can be done later</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="card mb-4 bg-light">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-lightbulb text-warning"></i> Tips</h6>
+                    </div>
+                    <div class="card-body">
+                        <small>
+                            <ul class="mb-0">
+                                <li>Use clear, actionable titles</li>
+                                <li>Set reminders for critical tasks</li>
+                                <li>Link tasks to cases for better organization</li>
+                                <li>Review your task list daily</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'task_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Create Task
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+.form-label {
+    font-weight: 600;
+}
+
+.form-text {
+    font-size: 0.875rem;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+</style>
+
+<script>
+// Toggle reminder fields
+function toggleReminder() {
+    const reminderFields = document.getElementById('reminderFields');
+    const enableReminder = document.getElementById('enableReminder');
+    const reminderDate = document.getElementById('reminder_date');
+    const reminderTime = document.getElementById('reminder_time');
+
+    if (enableReminder.checked) {
+        reminderFields.style.display = 'block';
+        reminderDate.required = false; // Optional even when shown
+        reminderTime.required = false;
+    } else {
+        reminderFields.style.display = 'none';
+        reminderDate.required = false;
+        reminderTime.required = false;
+        reminderDate.value = '';
+        reminderTime.value = '';
+    }
+}
+
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('due_date').setAttribute('min', today);
+    document.getElementById('reminder_date').setAttribute('min', today);
+});
+</script>
+{% endblock %}
